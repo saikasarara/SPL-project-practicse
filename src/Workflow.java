@@ -32,25 +32,33 @@ public class Workflow {
         while (true) {
             // Display menu options
             System.out.print("\nMenu:\n");
-            System.out.print("1. Search/Filter Orders\n");
-            System.out.print("2. Update Order Status\n");
-            System.out.print("3. View Order Logs\n");
-            System.out.print("4. Generate Report\n");
-            System.out.print("5. Reorder Previous Order\n");
-            System.out.print("6. Advanced Product Filter\n");
-            System.out.print("7. Low Stock Alerts\n");
-            System.out.print("8. Export Stock Report\n");
-            System.out.print("9. Bulk Import Orders\n");
-            System.out.print("10. Simulation Mode\n");
-            System.out.print("11. Retry Failed Order\n");
-            System.out.print("12. Archive Delivered Orders\n");
-            System.out.print("13. Change Admin Password\n");
-            System.out.print("14. Clear Logs\n");
-            System.out.print("15. Generate Receipt\n");
-            System.out.print("16. Restock Product\n");
-            System.out.print("17. Manage Products (Add/Edit/Delete)\n");
-            System.out.print("18. Load Test Data\n");
-            System.out.print("19. Accept New Order\n");
+            System.out.print("1.Accept New Order\n");
+            System.out.print("2.Update Order Status\n");
+            System.out.print("3.View Order Logs\n");
+            System.out.print("4.Search/Filter Orders\n");
+            System.out.print("5.Generate Receipt\n");
+           
+           
+            System.out.print("6.Advanced Product Filter\n");
+            System.out.print("7.Manage Products (Add/Edit/Delete)\n");
+            System.out.print("8.Low Stock Alerts\n");
+            System.out.print("9.Restock Product\n");
+            System.out.print("10.Export Stock Report\n");
+            System.out.print("11.Bulk Import Orders\n");
+            
+
+            System.out.print("12.Archive Delivered Orders\n");
+            System.out.print("13.Reorder Previous Order\n");
+            System.out.print("14.Retry Failed Order\n");
+            
+            System.out.print("15.Clear Logs\n");
+            System.out.print("16.Change Admin Password\n");
+            
+            
+            System.out.print("17.Generate Report\n");
+            System.out.print("18.Simulation Mode\n");
+            System.out.print("19.Load Test Data\n");
+            
             System.out.print("0. Exit\n");
             System.out.print("Choose an option: ");
             String choice = console.readLine();
@@ -58,7 +66,9 @@ public class Workflow {
             choice = choice.trim();
             System.out.print("\n");
             switch (choice) {
-                case "1": handleOrderSearch(console); break;
+                case "1":  // New case for Accept New Order
+                acceptNewOrder(console);
+                break;
                 case "2": handleStatusUpdate(console); break;
                 case "3":
                     System.out.print("Enter Order ID to view logs: ");
@@ -68,21 +78,22 @@ public class Workflow {
                         log.viewLogsByOrder(logId);
                     }
                     break;
-                case "4": generateReport(); break;
-                case "5": handleReorder(console); break;
+                case "4": handleOrderSearch(console); break;
+                case "5": generateReceipt(console); break;
                 case "6": handleAdvancedFilter(console); break;
-                case "7": showLowStockAlerts(); break;
-                case "8": exportStockReport(); break;
-                case "9": importOrdersFromFile(console); break;
-                case "10": runSimulation(console); break;
-                case "11": retryCancelledOrder(console); break;
+                case "7": handleProductManagement(console); break;
+                case "8": showLowStockAlerts(); break;
+                case "9": handleRestock(console); break;
+                case "10": exportStockReport(); break;
+                case "11": importOrdersFromFile(console); break;
                 case "12": archiveDeliveredOrders(console); break;
-                case "13": changeAdminPassword(console); break;
-                case "14": clearLogs(console); break;
-                case "15": generateReceipt(console); break;
-                case "16": handleRestock(console); break;
-                case "17": handleProductManagement(console); break;
-                case "18":
+                case "13": handleReorder(console); break;
+                case "14": retryCancelledOrder(console);break;
+                case "15": clearLogs(console); break;
+                case "16": changeAdminPassword(console); break;
+                case "17": generateReport(); break;
+                case "18": runSimulation(console); break;
+                case "19":
                     System.out.print("Enter test data filename (e.g. testdata.txt): ");
                     String file = console.readLine();
                     if (file == null) file = "";
@@ -96,9 +107,7 @@ public class Workflow {
 
                     }
                     break;
-                case "19":  // New case for Accept New Order
-                acceptNewOrder(console);
-                break;
+                
                 case "0":
                     System.out.print("Exiting Admin Dashboard...\n");
                     return;
@@ -1093,7 +1102,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
         System.out.print(report.toString());
         System.out.print("(Full report saved to report.txt)\n");
     }
-    
+
 
     /** Helper: normalize input to full Order ID format (e.g., add 'O' prefix if missing) */
   private String normalizeOrderId(String id) {

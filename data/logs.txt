@@ -16,3 +16,5 @@ Order O1007 - Status changed to PACKED
 Order O1006 - Status changed to OUT_FOR_DELIVERY
 Order O1006 - Status changed to DELIVERED
 Order O1007 - Status changed to SHIPPED
+Order O1007 - Status changed to OUT_FOR_DELIVERY
+Order ADMIN - Password changed
