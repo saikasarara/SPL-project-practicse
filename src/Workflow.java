@@ -49,6 +49,7 @@ public class Workflow {
             System.out.print("15. Generate Receipt\n");
             System.out.print("16. Restock Product\n");
             System.out.print("17. Manage Products (Add/Edit/Delete)\n");
+            System.out.print("18. Load Test Data\n");
             System.out.print("0. Exit\n");
             System.out.print("Choose an option: ");
             String choice = console.readLine();
@@ -56,84 +57,41 @@ public class Workflow {
             choice = choice.trim();
             System.out.print("\n");
             switch (choice) {
-                case "1":
-                    // Search or filter orders by ID or status
-                    handleOrderSearch(console);
-                    break;
-                case "2":
-                    // Manual status update for an order (progress through workflow)
-                    handleStatusUpdate(console);
-                    break;
+                case "1": handleOrderSearch(console); break;
+                case "2": handleStatusUpdate(console); break;
                 case "3":
-                    // View workflow logs (timeline) for a specific order
                     System.out.print("Enter Order ID to view logs: ");
                     String logId = console.readLine();
-                    if (logId != null) {
-                        logId = logId.trim();
-                        if (!logId.equals("")) {
-                            logId = normalizeOrderId(logId);
-                            log.viewLogsByOrder(logId);
-                        }
+                    if (logId != null && !logId.trim().equals("")) {
+                        logId = normalizeOrderId(logId.trim());
+                        log.viewLogsByOrder(logId);
                     }
                     break;
-                case "4":
-                    // Generate summary report and save to report.txt
-                    generateReport();
-                    break;
-                case "5":
-                    // Reorder a previous order (copy items to new order and process it)
-                    handleReorder(console);
-                    break;
-                case "6":
-                    // Advanced product filtering (by brand/category) with optional sorting
-                    handleAdvancedFilter(console);
-                    break;
-                case "7":
-                    // List items with low stock (<5) and highlight them
-                    showLowStockAlerts();
-                    break;
-                case "8":
-                    // Export current stock levels to stock_report.txt
-                    exportStockReport();
-                    break;
-                case "9":
-                    // Bulk import orders from orders_import.txt
-                    importOrdersFromFile();
-                    break;
-                case "10":
-                    // Simulation mode for generating test orders (4 scenarios)
-                    runSimulation(console);
-                    break;
-                case "11":
-                    // Retry processing a failed (cancelled) order by ID
-                    retryCancelledOrder(console);
-                    break;
-                case "12":
-                    // Archive delivered orders older than N days
-                    archiveDeliveredOrders(console);
-                    break;
-                case "13":
-                    // Change password for the logged-in admin
-                    changeAdminPassword(console);
-                    break;
-                case "14":
-                    // Clear all logs (logs.txt)
-                    clearLogs(console);
-                    break;
-                case "15":
-                    // Generate a receipt file for a delivered order
-                    generateReceipt(console);
-                    break;
-                case "16":
-                    // Restock a product (increase its stock quantity)
-                    handleRestock(console);
-                    break;
-                case "17":
-                    // Manage products (add, edit, delete)
-                    handleProductManagement(console);
+                case "4": generateReport(); break;
+                case "5": handleReorder(console); break;
+                case "6": handleAdvancedFilter(console); break;
+                case "7": showLowStockAlerts(); break;
+                case "8": exportStockReport(); break;
+                case "9": importOrdersFromFile(console); break;
+                case "10": runSimulation(console); break;
+                case "11": retryCancelledOrder(console); break;
+                case "12": archiveDeliveredOrders(console); break;
+                case "13": changeAdminPassword(console); break;
+                case "14": clearLogs(console); break;
+                case "15": generateReceipt(console); break;
+                case "16": handleRestock(console); break;
+                case "17": handleProductManagement(console); break;
+                case "18":
+                    System.out.print("Enter test data filename (e.g. testdata.txt): ");
+                    String file = console.readLine();
+                    if (file == null) file = "";
+                    file = file.trim();
+                    if (!file.equals("")) {
+                        dp.loadTestDataFromFile(file);
+                        System.out.print("Test data loaded from " + file + "\n");
+                    }
                     break;
                 case "0":
-                    // Exit the dashboard loop
                     System.out.print("Exiting Admin Dashboard...\n");
                     return;
                 default:
@@ -144,92 +102,107 @@ public class Workflow {
         }
     }
 
-    /** Feature 1 & 21: Search by Order ID or filter by Status, and view details if requested */
-    private void handleOrderSearch(BufferedReader console) throws Exception {
-        System.out.print("Enter Order ID or Status to search: ");
-        String query = console.readLine();
-        if (query == null) query = "";
-        query = query.trim();
-        if (query.equalsIgnoreCase("")) {
-            System.out.print("Search query cannot be empty.\n");
+private void handleOrderSearch(BufferedReader console) throws Exception {
+    System.out.print("Enter Order ID (e.g. O1001) or full Status (e.g. DELIVERED): ");
+    String query = console.readLine();
+    if (query == null) query = "";
+    query = query.trim().toUpperCase();
+    if (query.equals("")) {
+        System.out.print("Search query cannot be empty.\n");
+        return;
+    }
+
+    // Normalize numeric ID like 1001 into O1001
+    if (!query.startsWith("O") && isNumeric(query)) {
+        query = "O" + query;
+    }
+
+    // === Try Exact Order ID Match First ===
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o != null && o.orderId.equalsIgnoreCase(query)) {
+            System.out.print("\n=== Order Found ===\n");
+            viewOrderDetails(o);
             return;
         }
-        String q = query.toUpperCase();
-        // Determine if query is an Order ID or a Status keyword
-        Order found = null;
-        // Normalize if looks like a numeric ID (e.g., "1001" -> "O1001")
-        if (!q.startsWith("O") && isNumeric(q)) {
-            q = "O" + q;
-        }
-        // Try to find order by ID
-        for (int i = 0; i < dp.orderCount; i++) {
-            Order o = dp.orders[i];
-            if (o != null && o.orderId.toUpperCase().equals(q)) {
-                found = o;
-                break;
-            }
-        }
-        if (found != null) {
-            // If an exact Order ID match is found, show full details for that order
-            viewOrderDetails(found);
-        } else {
-            // No exact ID match – treat query as a status filter (substring match in status)
-            String statusQuery = q;
-            Order[] results = new Order[dp.orderCount];
-            int count = 0;
-            for (int i = 0; i < dp.orderCount; i++) {
-                Order o = dp.orders[i];
-                if (o == null) continue;
-                // If order status contains the query string (e.g., "DELIVERED" contains "DEL")
-                if (o.status.toUpperCase().contains(statusQuery)) {
-                    results[count++] = o;
-                }
-            }
-            if (count == 0) {
-                System.out.print("No orders found matching \"" + query + "\".\n");
-            } else {
-                // List orders that match the status filter
-                System.out.print("Orders with status containing \"" + query + "\":\n");
-                for (int i = 0; i < count; i++) {
-                    Order o = results[i];
-                    // Color-code status for output
-                    String statusStr = o.status;
-                    if (statusStr.equals("DELIVERED")) {
-                        statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
-                    } else if (statusStr.equals("CANCELLED")) {
-                        statusStr = ANSI_RED + statusStr + ANSI_RESET;
-                    }
-                    System.out.print("- " + o.orderId + " | Status: " + statusStr + " | Total: BDT " + o.totalAmount);
-                    if (o.cancelReason != null && !o.cancelReason.equals("")) {
-                        System.out.print(" | CancelReason: " + o.cancelReason);
-                    }
-                    System.out.print("\n");
-                }
-                // Optionally, allow viewing details of one specific order from the list
-                System.out.print("Enter Order ID to view details (or press Enter to skip): ");
-                String selId = console.readLine();
-                if (selId == null) selId = "";
-                selId = selId.trim();
-                if (!selId.equals("")) {
-                    selId = normalizeOrderId(selId);
-                    // Find that order in our results or main list
-                    Order target = null;
-                    for (int i = 0; i < dp.orderCount; i++) {
-                        Order o = dp.orders[i];
-                        if (o != null && o.orderId.equalsIgnoreCase(selId)) {
-                            target = o;
-                            break;
-                        }
-                    }
-                    if (target != null) {
-                        viewOrderDetails(target);
-                    } else {
-                        System.out.print("Order " + selId + " not found in results.\n");
-                    }
-                }
-            }
+    }
+
+    // === Ask for Optional Filters ===
+    System.out.print("Also filter by Payment Mode? (Y/N): ");
+    String payOpt = console.readLine();
+    String payMode = null;
+    if (payOpt != null && payOpt.trim().equalsIgnoreCase("Y")) {
+        System.out.print("Enter mode (COD/MockCard): ");
+        payMode = console.readLine();
+        if (payMode == null) payMode = "";
+        payMode = payMode.trim();
+    }
+
+    System.out.print("Also filter by Order Date? (Y/N): ");
+    String dateOpt = console.readLine();
+    String dateFilter = null;
+    if (dateOpt != null && dateOpt.trim().equalsIgnoreCase("Y")) {
+        System.out.print("Enter date (YYYY-MM-DD): ");
+        dateFilter = console.readLine();
+        if (dateFilter == null) dateFilter = "";
+        dateFilter = dateFilter.trim();
+    }
+
+    // === Apply Combined Filters ===
+    Order[] results = new Order[dp.orderCount];
+    int count = 0;
+
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null) continue;
+
+        boolean matchStatus = o.status.equalsIgnoreCase(query);
+        boolean matchPayment = (payMode == null || o.paymentMode.equalsIgnoreCase(payMode));
+        boolean matchDate = (dateFilter == null || o.date.equals(dateFilter));
+
+        if (matchStatus && matchPayment && matchDate) {
+            results[count++] = o;
         }
     }
+
+    if (count == 0) {
+        System.out.print("No orders found matching those filters.\n");
+        return;
+    }
+
+    // === Display Results ===
+    System.out.print("\nOrders matching filters:\n");
+    for (int i = 0; i < count; i++) {
+        Order o = results[i];
+        String statusStr = o.status;
+        if (statusStr.equals("DELIVERED")) {
+            statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
+        } else if (statusStr.equals("CANCELLED")) {
+            statusStr = ANSI_RED + statusStr + ANSI_RESET;
+        } else if (statusStr.equals("PACKED") || statusStr.equals("SHIPPED") || statusStr.equals("OUT_FOR_DELIVERY")) {
+            statusStr = ANSI_YELLOW + statusStr + ANSI_RESET;
+        }
+        System.out.print("- " + o.orderId + " | " + o.date + " | " + statusStr + " | Payment: " + o.paymentMode + " | Total: BDT " + o.totalAmount);
+        if (o.cancelReason != null && !o.cancelReason.equals("")) {
+            System.out.print(" | CancelReason: " + o.cancelReason);
+        }
+        System.out.print("\n");
+    }
+
+    System.out.print("\nEnter Order ID to view details (or press Enter to skip): ");
+    String selId = console.readLine();
+    if (selId != null && !selId.trim().equals("")) {
+        selId = normalizeOrderId(selId.trim());
+        for (int i = 0; i < count; i++) {
+            if (results[i].orderId.equalsIgnoreCase(selId)) {
+                viewOrderDetails(results[i]);
+                return;
+            }
+        }
+        System.out.print("Order " + selId + " not found in filtered list.\n");
+    }
+}
+
 
     /** Feature 6: Manually progress an order status through the workflow (PENDING -> PACKED -> SHIPPED -> OUT_FOR_DELIVERY -> DELIVERED) */
     private void handleStatusUpdate(BufferedReader console) throws Exception {
@@ -416,33 +389,45 @@ public class Workflow {
     }
 
     /** Feature 10: Bulk import orders from orders_import.txt */
-    private void importOrdersFromFile() throws Exception {
+   private void importOrdersFromFile(BufferedReader console) throws Exception{
         BufferedReader br = null;
         int importedCount = 0;
         try {
-            br = new BufferedReader(new FileReader(dp.path("orders_import.txt")));
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.equals("")) continue;
-                // Expected format per line: Date|ItemList  (PaymentMode not specified in file, default to COD)
-                String[] parts = line.split("\\|");
-                String date = (parts.length > 0 ? parts[0].trim() : currentDateString());
-                String itemsPart = (parts.length > 1 ? parts[1].trim() : "");
-                // Create new order from the import line
-                Order newOrder = new Order();
-                newOrder.orderId = dp.generateOrderId();
-                newOrder.date = (date.equals("") ? currentDateString() : date);
-                newOrder.address = "ImportedOrder";
-                newOrder.paymentMode = "COD";
-                dp.parseItemsIntoOrder(newOrder, itemsPart);
-                // Process the order (inventory & payment)
-                processPendingOrder(newOrder, null);  // pass null for console to auto process (will not prompt since COD)
-                // Add to system
-                dp.orders[dp.orderCount++] = newOrder;
-                importedCount++;
-                System.out.print("Imported Order " + newOrder.orderId + " (" + newOrder.status + ")\n");
+       br = new BufferedReader(new FileReader(dp.path("orders_import.json")));
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.length() == 0) continue;
+
+            // Extract fields manually
+            String orderId = extract(line, "\"orderId\":\"", "\"");
+            String date = extract(line, "\"date\":\"", "\"");
+            String address = extract(line, "\"address\":\"", "\"");
+            String paymentMode = extract(line, "\"paymentMode\":\"", "\"");
+            String itemList = extract(line, "\"items\":\"", "\"");
+
+            // Create Order object
+            Order o = new Order();
+            o.orderId = orderId;
+            o.date = date;
+            o.address = address;
+            o.paymentMode = paymentMode;
+            o.status = "PENDING";
+            dp.parseItemsIntoOrder(o, itemList);
+
+            // Calculate total
+            int total = 0;
+            for (int i = 0; i < o.itemCount; i++) {
+                Product p = dp.findProductById(o.items[i].productId);
+                if (p != null) {
+                    total += p.price * o.items[i].quantity;
+                }
             }
+            o.totalAmount = total;
+
+            dp.orders[dp.orderCount++] = o;
+            System.out.print("Imported: " + o.orderId + "\n");
+        }
         } catch (Exception e) {
             System.out.print("Error reading orders_import.txt\n");
         } finally {
@@ -450,6 +435,15 @@ public class Workflow {
         }
         System.out.print(importedCount + " orders imported from orders_import.txt.\n");
     }
+    private String extract(String src, String prefix, String endToken) {
+    int start = src.indexOf(prefix);
+    if (start == -1) return "";
+    start += prefix.length();
+    int end = src.indexOf(endToken, start);
+    if (end == -1) return src.substring(start);
+    return src.substring(start, end);
+}
+
 
     /** Feature 11: Simulation mode to generate and process orders in various scenarios */
     private void runSimulation(BufferedReader console) throws Exception {
@@ -896,88 +890,106 @@ public class Workflow {
         }
     }
 
-    /** Process a PENDING order through inventory check, reservation, invoice generation, and payment simulation */
-    private boolean processPendingOrder(Order order, BufferedReader console) throws Exception {
-        if (order == null || !order.status.equals("PENDING")) return false;
-        // Inventory verification for each item
-        for (int i = 0; i < order.itemCount; i++) {
-            Item it = order.items[i];
-            if (it == null) continue;
-            Product prod = dp.findProductById(it.productId);
-            if (prod == null) {
-                order.status = "CANCELLED";
-                order.cancelReason = "Invalid product " + it.productId;
-                log.write(order.orderId, "Order cancelled – " + order.cancelReason);
-                return false;
-            }
-            if (prod.stock < it.quantity) {
-                order.status = "CANCELLED";
-                order.cancelReason = "Inventory Shortage";
-                log.write(order.orderId, "Order cancelled – " + order.cancelReason);
-                return false;
-            }
+ /** Process a PENDING order through inventory check, reservation, invoice generation, and payment simulation */
+private boolean processPendingOrder(Order order, BufferedReader console) throws Exception {
+    if (order == null || !order.status.equals("PENDING")) return false;
+
+    boolean inventoryOK = true;
+
+    // Step 1: Pre-check all items without modifying stock
+    for (int i = 0; i < order.itemCount; i++) {
+        Item it = order.items[i];
+        if (it == null) continue;
+        Product prod = dp.findProductById(it.productId);
+        if (prod == null) {
+            order.status = "CANCELLED";
+            order.cancelReason = "Invalid product " + it.productId;
+            log.write(order.orderId, "Order cancelled – " + order.cancelReason);
+            return false;
         }
-        // Reserve stock (deduct quantities from inventory)
+        if (prod.stock < it.quantity) {
+            inventoryOK = false;
+            order.cancelReason = "Inventory Shortage: " + it.productId;
+            break;
+        }
+    }
+
+    if (!inventoryOK) {
+        order.status = "CANCELLED";
+        log.write(order.orderId, "Order cancelled – " + order.cancelReason);
+        return false;
+    }
+
+    // Step 2: Reserve stock
+    for (int i = 0; i < order.itemCount; i++) {
+        Item it = order.items[i];
+        Product prod = dp.findProductById(it.productId);
+        if (prod != null) {
+            prod.stock -= it.quantity;
+        }
+    }
+    log.write(order.orderId, "Inventory OK – stock reserved");
+
+    // Step 3: Calculate total price
+    int total = 0;
+    for (int i = 0; i < order.itemCount; i++) {
+        Item it = order.items[i];
+        Product prod = dp.findProductById(it.productId);
+        int price = (prod != null ? prod.price : 0);
+        total += price * it.quantity;
+    }
+    order.totalAmount = total;
+
+    // Step 4: Simulate payment
+    boolean paymentSuccess;
+    if (console == null) {
+        paymentSuccess = order.paymentMode.equalsIgnoreCase("COD");
+        if (paymentSuccess) {
+            log.write(order.orderId, "PAYMENT OK (Imported COD)");
+        } else {
+            log.write(order.orderId, "PAYMENT FAIL (Imported auto decline)");
+        }
+    } else {
+        paymentSuccess = paymentService.processPayment(order, console);
+    }
+
+    // Step 5: Rollback stock if payment fails
+    if (!paymentSuccess) {
         for (int i = 0; i < order.itemCount; i++) {
             Item it = order.items[i];
             Product prod = dp.findProductById(it.productId);
             if (prod != null) {
-                prod.stock -= it.quantity;
+                prod.stock += it.quantity;
             }
         }
-        log.write(order.orderId, "Inventory OK – stock reserved");
-        // Calculate invoice total amount
-        int total = 0;
-        for (int i = 0; i < order.itemCount; i++) {
-            Item it = order.items[i];
-            Product prod = dp.findProductById(it.productId);
-            int price = (prod != null ? prod.price : 0);
-            total += price * it.quantity;
-        }
-        order.totalAmount = total;
-        // Simulate payment (if console is not provided, assume automated COD)
-        boolean paymentSuccess;
-        if (console == null) {
-            // If no console (e.g., during import), auto-approve COD payments
-            paymentSuccess = order.paymentMode.equalsIgnoreCase("COD") ? true : false;
-            if (order.paymentMode.equalsIgnoreCase("COD")) {
-                log.write(order.orderId, "PAYMENT OK (Imported COD)");
-            } else if (order.paymentMode.equalsIgnoreCase("MockCard")) {
-                // auto-decline for import simulation if any MockCard (rare for import)
-                log.write(order.orderId, "PAYMENT FAIL (Imported auto decline)");
-                paymentSuccess = false;
-            }
-        } else {
-            // Use PaymentService to process (which may prompt for approval if MockCard)
-            paymentSuccess = paymentService.processPayment(order, console);
-        }
-        if (!paymentSuccess) {
-            // Payment failed: rollback inventory (return reserved stock)
-            for (int i = 0; i < order.itemCount; i++) {
-                Item it = order.items[i];
-                Product prod = dp.findProductById(it.productId);
-                if (prod != null) {
-                    prod.stock += it.quantity;
-                }
-            }
-            order.status = "CANCELLED";
-            order.cancelReason = "Payment Declined";
-            log.write(order.orderId, "Order cancelled – " + order.cancelReason);
-            return false;
-        }
-        // Payment succeeded: mark order as PACKED (ready for shipment)
-        order.status = "PACKED";
-        log.write(order.orderId, "Status changed to PACKED");
-        // Generate invoice record (append to invoices.txt)
-        try {
-            FileWriter fw = new FileWriter(dp.path("invoices.txt"), true);
-            fw.write("INV-" + order.orderId + "|BDT " + order.totalAmount + "\n");
-            fw.close();
-        } catch (Exception e) {
-            // ignore invoice file errors
-        }
-        return true;
+        order.status = "CANCELLED";
+        order.cancelReason = "Payment Declined";
+        log.write(order.orderId, "Order cancelled – " + order.cancelReason);
+        return false;
     }
+
+    // Step 6: Mark as PACKED and generate properly formatted invoice
+    order.status = "PACKED";
+    log.write(order.orderId, "Status changed to PACKED");
+
+    try {
+        // ✅ Format: INV-YYYYMM-####
+        String ym = order.date.substring(0, 7).replace("-", ""); // "202602"
+        String orderNum = order.orderId.substring(1); // drop 'O' → "1005"
+        String invoiceId = "INV-" + ym + "-" + orderNum;
+
+        FileWriter fw = new FileWriter(dp.path("invoices.txt"), true);
+        fw.write(invoiceId + "|BDT " + order.totalAmount + "\n");
+        fw.close();
+
+        // (Optional) Show invoice ID to admin
+        System.out.print("Invoice generated: " + invoiceId + "\n");
+    } catch (Exception e) {
+        // Ignore invoice errors silently
+    }
+
+    return true;
+}
 
     /** View detailed information of an order (internal helper) */
     private void viewOrderDetails(Order order) {

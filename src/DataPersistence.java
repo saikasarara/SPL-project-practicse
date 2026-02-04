@@ -263,5 +263,60 @@ public class DataPersistence {
         }
         return null;
     }
+public void loadTestDataFromFile(String filename) {
+    try (BufferedReader br = new BufferedReader(new FileReader(path(filename)))) {
+        String line;
+        String mode = "";
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.equals("")) continue;
+
+            if (line.startsWith("#")) {
+                mode = line.toUpperCase();
+                continue;
+            }
+
+            if (mode.equals("#PRODUCTS")) {
+                String[] parts = line.split("\\|");
+                if (parts.length == 6) {
+                    String pid = parts[0];
+                    String cat = parts[1];
+                    String brand = parts[2];
+                    String name = parts[3];
+                    int price = toInt(parts[4]);
+                    int stock = toInt(parts[5]);
+                    products[productCount++] = new Product(pid, cat, brand, name, price, stock);
+                }
+            } else if (mode.equals("#ADMINS")) {
+                String[] parts = line.split("\\|");
+                if (parts.length == 2) {
+                    String username = parts[0];
+                    String passHash = parts[1];
+                    admins[adminCount++] = new Admin(username, passHash);
+                }
+            } else if (mode.equals("#ORDERS")) {
+                String[] parts = line.split("\\|");
+                if (parts.length >= 7) {
+                    Order o = new Order();
+                    o.orderId = parts[0];
+                    o.date = parts[1];
+                    o.address = parts[2];
+                    o.paymentMode = parts[3];
+                    o.status = parts[4];
+                    parseItemsIntoOrder(o, parts[5]);
+                    o.totalAmount = toInt(parts[6]);
+                    if (parts.length >= 8) o.cancelReason = parts[7];
+                    orders[orderCount++] = o;
+                }
+            }
+        }
+        System.out.print("Test data loaded from " + filename + "\n");
+    } catch (Exception e) {
+        System.out.print("Failed to load test data from " + filename + ": " + e.getMessage() + "\n");
+    }
+}
+
+
+
 }
 
