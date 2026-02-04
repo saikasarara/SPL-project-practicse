@@ -1,2 +1,18 @@
 Order ADMIN - Restocked L204 (+56)
 Order ADMIN - Password changed
+Order O1006 - Order created via admin interface (pending)
+Order O1006 - Inventory OK – stock reserved
+Order O1006 - PAYMENT OK (Cash on Delivery)
+Order O1006 - Status changed to PACKED
+Order O1006 - Order created via admin interface (pending)
+Order O1006 - Inventory OK – stock reserved
+Order O1006 - PAYMENT OK (Cash on Delivery)
+Order O1006 - Status changed to PACKED
+Order O1006 - Status changed to SHIPPED
+Order O1007 - Order created via admin interface (pending)
+Order O1007 - Inventory OK – stock reserved
+Order O1007 - PAYMENT OK (Cash on Delivery)
+Order O1007 - Status changed to PACKED
+Order O1006 - Status changed to OUT_FOR_DELIVERY
+Order O1006 - Status changed to DELIVERED
+Order O1007 - Status changed to SHIPPED

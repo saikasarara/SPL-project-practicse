@@ -1093,15 +1093,18 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
         System.out.print(report.toString());
         System.out.print("(Full report saved to report.txt)\n");
     }
+    
 
     /** Helper: normalize input to full Order ID format (e.g., add 'O' prefix if missing) */
-    private String normalizeOrderId(String id) {
-        id = id.trim().toUpperCase();
-        if (!id.startsWith("O")) {
-            id = "O" + id;
-        }
-        return id;
+  private String normalizeOrderId(String id) {
+    id = id.trim().toUpperCase();
+    if (!id.startsWith("O")) {
+        // Remove leading zeros from numeric part
+        id = id.replaceFirst("^0+(?!$)", "");  // "01006" becomes "1006"
+        id = "O" + id;
     }
+    return id;
+}
 
     /** Helper: check if a string is numeric */
     private boolean isNumeric(String s) {
@@ -1154,12 +1157,12 @@ private void acceptNewOrder(BufferedReader console) throws Exception {
     System.out.print("-----------------------\n");
 
     // 3. Allow admin to select 1–3 products and specify quantities
-    System.out.print("How many different products in this order? (1-3): ");
+    System.out.print("How many different products in this order? (1-10): ");
     String countStr = console.readLine();
     if (countStr == null) countStr = "";
     countStr = countStr.trim();
     int itemCount = DataPersistence.toInt(countStr);
-    if (itemCount < 1 || itemCount > 3) {
+    if (itemCount < 1 || itemCount > 10) {
         System.out.print("Invalid number of products. Order cancelled.\n");
         return;
     }
