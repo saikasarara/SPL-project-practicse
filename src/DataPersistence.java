@@ -106,35 +106,38 @@ public class DataPersistence {
         }
     }
 
-    private void loadAdmins() throws Exception {
+ private void loadAdmins() throws Exception {
+    BufferedReader br = null;
+    try {
+        br = new BufferedReader(new FileReader(path("admins.txt"))); // ✅ Fixed path
+        String line;
         adminCount = 0;
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(path("admins.txt")));
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.length() == 0) continue;
-                // Format: username|hashedPassword
-                String[] parts = line.split("\\|");
-                String user = parts[0].trim();
-                String hash = (parts.length > 1 ? parts[1].trim() : "");
-                if (!user.equals("") && !hash.equals("")) {
-                    admins[adminCount++] = new Admin(user, hash);
-                }
+        while ((line = br.readLine()) != null) {
+            String[] parts = line.split("\\|");
+            if (parts.length == 2) {
+                String username = parts[0].trim();
+                String passHash = parts[1].trim();
+                admins[adminCount++] = new Admin(username, passHash);
             }
-        } catch (Exception e) {
-            // If admins file not found, create default admin later
-        } finally {
-            if (br != null) br.close();
         }
-        if (adminCount == 0) {
-            // If no admin loaded, create a default admin account (admin/admin123)
-            String defaultUser = "admin";
-            String defaultPassHash = Admin.hashPassword("admin123");
-            admins[adminCount++] = new Admin(defaultUser, defaultPassHash);
-        }
+    } catch (Exception e) {
+        // If admins file not found, create default admin later
+    } finally {
+        if (br != null) br.close();
     }
+
+    // ✅ Add this debug print AFTER loading is complete
+    for (int i = 0; i < adminCount; i++) {
+        System.out.print("Loaded admin: " + admins[i].username + "\n");
+    }
+
+    if (adminCount == 0) {
+        String defaultUser = "admin";
+        String defaultPassHash = Admin.hashPassword("admin123");
+        admins[adminCount++] = new Admin(defaultUser, defaultPassHash);
+    }
+}
+
 
     /** Save all data back to text files */
     public void saveAll() throws Exception {
