@@ -19,13 +19,13 @@ public class DataPersistence {
         this.baseDir = (baseDir == null ? "" : baseDir);
     }
 
-    /** Utility to get full file path with base directory (if any) */
-    public String path(String filename) {
-        if (baseDir.equals("")) {
-            return filename;
-        }
-        return baseDir + "/" + filename;
+  public String path(String filename) {
+    if (baseDir.equals("")) {
+        return filename; // e.g. "admins.txt"
     }
+    return baseDir + "/" + filename; // e.g. "data/admins.txt"
+}
+
 
     /** Load all data from files: products, orders, admins */
     public void loadAll() throws Exception {

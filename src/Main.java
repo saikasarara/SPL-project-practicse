@@ -8,7 +8,7 @@ public class Main {
             // Prepare console reader for CLI input
             BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
             // Initialize data persistence (loads data from text files)
-            DataPersistence dp = new DataPersistence("");  // base directory "" = current directory
+            DataPersistence dp = new DataPersistence("data");  // base directory "" = current directory
             dp.loadAll();
             // Initialize logging system
             Log log = new Log(dp);
