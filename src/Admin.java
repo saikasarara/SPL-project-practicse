@@ -1,3 +1,4 @@
+import java.io.BufferedReader;
 import java.security.MessageDigest;
 
 /** Admin.java – Admin model and authentication logic (password hashing for secure login) */
