@@ -28,3 +28,9 @@ Order O1013 - Simulated order created (Payment Failure)
 Order O1013 - Simulation completed for Order: O1013
 Order O1014 - Simulated successful order created (DELIVERED)
 Order O1014 - Simulation completed for Order: O1014
+Order O1012 - Order cancelled -Inventory Shortage: M101
+Order O1012 - Simulation order created (Status: CANCELLED)
+Order O1012 - Simulation order with status: CANCELLED
+Order O1013 - Order cancelled -Inventory Shortage: M101
+Order O1013 - Simulation order created (Status: CANCELLED)
+Order O1013 - Simulation order with status: CANCELLED

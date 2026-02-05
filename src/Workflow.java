@@ -581,6 +581,8 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         }
         simOrder.addItem(new Item(p.productId, 1));
         simOrder.paymentMode = "MockCard";
+        simOrder.status = "CANCELLED"; // Simulate failure
+        simOrder.cancelReason = "Payment Failure (MockCard)";
     } else if (opt.equals("3")) {
         // Scenario 3: Inventory shortage – order more than available stock of a product
         Product p = null;
@@ -596,6 +598,9 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         int largeQty = (p.stock == 0 ? 5 : p.stock + 5);
         simOrder.addItem(new Item(p.productId, largeQty));
         simOrder.paymentMode = "COD";
+        // Mark the order as cancelled due to inventory shortage
+        simOrder.status = "CANCELLED"; // Simulate cancellation
+        simOrder.cancelReason = "Inventory Shortage";
     } else {
         // Scenario 1 or 4: Successful or Random order – pick 1-2 random items within stock
         if (dp.productCount == 0) {
@@ -609,22 +614,14 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
             simOrder.addItem(new Item(p2.productId, 1));
         }
         simOrder.paymentMode = "COD";
+        // Successful order – set the status as "DELIVERED"
+        simOrder.status = "DELIVERED"; // Mark as delivered for successful order
     }
     simOrder.address = "SimulatedAddress";
 
     // Process the simulated order
-    boolean success = processPendingOrder(simOrder, console);
+     processPendingOrder(simOrder, console);
 
-    // Update status for the successful order
-    if (success) {
-        simOrder.status = "DELIVERED";  // Update to 'DELIVERED' if successful
-        // Log the success
-        log.write(simOrder.orderId, "Simulation order created (Status: " + simOrder.status + ")");
-    } else {
-        simOrder.status = "CANCELLED";  // Set status as 'CANCELLED' on failure
-        // Log the failure
-        log.write(simOrder.orderId, "Simulation order created (Status: " + simOrder.status + ")");
-    }
 
     // Add to system records (orders.txt)
     dp.orders[dp.orderCount++] = simOrder;
