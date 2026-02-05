@@ -18,3 +18,7 @@ Order O1006 - Status changed to DELIVERED
 Order O1007 - Status changed to SHIPPED
 Order O1007 - Status changed to OUT_FOR_DELIVERY
 Order ADMIN - Password changed
+Order O1008 - Order cancelled – Inventory Shortage: M101
+Order O1009 - Order cancelled – Inventory Shortage: M101
+Order O1010 - Order cancelled – Inventory Shortage: M102
+Order O1011 - Order cancelled – Inventory Shortage: M101

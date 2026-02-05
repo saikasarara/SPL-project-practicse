@@ -551,74 +551,93 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
 
     /** Feature 11: Simulation mode to generate and process orders in various scenarios */
-    private void runSimulation(BufferedReader console) throws Exception {
-        System.out.print("Simulation scenarios:\n");
-        System.out.print("1. Successful order\n");
-        System.out.print("2. Payment failure scenario\n");
-        System.out.print("3. Inventory shortage scenario\n");
-        System.out.print("4. Random order scenario\n");
-        System.out.print("Choose scenario (1-4): ");
-        String opt = console.readLine();
-        if (opt == null) opt = "";
-        opt = opt.trim();
-        if (!opt.matches("[1-4]")) {
-            System.out.print("Invalid scenario selection.\n");
+   private void runSimulation(BufferedReader console) throws Exception {
+    System.out.print("Simulation scenarios:\n");
+    System.out.print("1. Successful order\n");
+    System.out.print("2. Payment failure scenario\n");
+    System.out.print("3. Inventory shortage scenario\n");
+    System.out.print("4. Random order scenario\n");
+    System.out.print("Choose scenario (1-4): ");
+    String opt = console.readLine();
+    if (opt == null) opt = "";
+    opt = opt.trim();
+    if (!opt.matches("[1-4]")) {
+        System.out.print("Invalid scenario selection.\n");
+        return;
+    }
+
+    // Create a simulated order
+    Order simOrder = new Order();
+    simOrder.orderId = dp.generateOrderId();
+    simOrder.date = currentDateString();
+
+    // Build order based on scenario choice
+    if (opt.equals("2")) {
+        // Scenario 2: Payment failure – simulate failure (order will be cancelled)
+        Product p = dp.products[0];
+        if (p == null) {
+            System.out.print("No products available for simulation.\n");
             return;
         }
-        // Create a simulated order
-        Order simOrder = new Order();
-        simOrder.orderId = dp.generateOrderId();
-        simOrder.date = currentDateString();
-        // Build order based on scenario choice
-        if (opt.equals("2")) {
-            // Scenario 2: Payment failure – ensure total triggers a decline (simulate by prompting N)
-            // We choose a product and quantity such that admin can decline the payment (no automatic trigger needed)
-            Product p = dp.products[0];
-            if (p == null) {
-                System.out.print("No products available for simulation.\n");
-                return;
+        simOrder.addItem(new Item(p.productId, 1)); // Add one item
+        simOrder.paymentMode = "MockCard"; // Simulate payment failure
+
+        // Mark the order as cancelled due to payment failure
+        simOrder.status = "CANCELLED"; // Simulate failure
+        simOrder.cancelReason = "Payment Failure (MockCard)";
+
+    } else if (opt.equals("3")) {
+        // Scenario 3: Inventory shortage – order more than available stock
+        Product p = null;
+        // Find a product with limited stock
+        for (int i = 0; i < dp.productCount; i++) {
+            if (dp.products[i] != null && dp.products[i].stock > 0 && dp.products[i].stock < 10) {
+                p = dp.products[i];
+                break;
             }
-            // Use one item (admin will be prompted to decline manually)
-            simOrder.addItem(new Item(p.productId, 1));
-            simOrder.paymentMode = "MockCard";
-        } else if (opt.equals("3")) {
-            // Scenario 3: Inventory shortage – order more than available stock of a product
-            Product p = null;
-            // find a product with limited stock
-            for (int i = 0; i < dp.productCount; i++) {
-                if (dp.products[i] != null && dp.products[i].stock > 0 && dp.products[i].stock < 10) {
-                    p = dp.products[i];
-                    break;
-                }
-            }
-            if (p == null) {
-                p = dp.products[0];
-            }
-            int largeQty = (p.stock == 0 ? 5 : p.stock + 5);
-            simOrder.addItem(new Item(p.productId, largeQty));
-            simOrder.paymentMode = "COD";
-        } else {
-            // Scenario 1 or 4: Successful or Random order – pick 1-2 random items within stock
-            if (dp.productCount == 0) {
-                System.out.print("No products available to simulate order.\n");
-                return;
-            }
-            // Add 1 or 2 items randomly from available products
-            Product p1 = dp.products[0];
-            simOrder.addItem(new Item(p1.productId, 1));
-            if (opt.equals("4") && dp.productCount > 1) {
-                Product p2 = dp.products[1];
-                simOrder.addItem(new Item(p2.productId, 1));
-            }
-            simOrder.paymentMode = "COD";
         }
-        simOrder.address = "SimulatedAddress";
-        // Process the simulated order
-        processPendingOrder(simOrder, console);
-        // Add to system records
-        dp.orders[dp.orderCount++] = simOrder;
-        System.out.print("Simulation Order " + simOrder.orderId + " created (Status: " + simOrder.status + ").\n");
+        if (p == null) {
+            p = dp.products[0]; // fallback to the first product if none with low stock is found
+        }
+        int largeQty = (p.stock == 0 ? 5 : p.stock + 5); // Add more quantity than available
+        simOrder.addItem(new Item(p.productId, largeQty));
+        simOrder.paymentMode = "COD"; // Cash on delivery
+
+        // Mark the order as cancelled due to inventory shortage
+        simOrder.status = "CANCELLED"; // Simulate cancellation
+        simOrder.cancelReason = "Inventory Shortage";
+
+    } else {
+        // Scenario 1 or 4: Successful or Random order – pick 1-2 random items
+        if (dp.productCount == 0) {
+            System.out.print("No products available to simulate order.\n");
+            return;
+        }
+        Product p1 = dp.products[0];
+        simOrder.addItem(new Item(p1.productId, 1)); // Add one item
+
+        if (opt.equals("4") && dp.productCount > 1) {
+            Product p2 = dp.products[1];  // Add another item if it's the random scenario
+            simOrder.addItem(new Item(p2.productId, 1));
+        }
+
+        simOrder.paymentMode = "COD"; // Simulate COD payment
+
+        // Successful order – set the status as "DELIVERED"
+        simOrder.status = "DELIVERED"; // Mark as delivered for successful order
     }
+
+    simOrder.address = "SimulatedAddress"; // Assign a sample address
+
+    // Process the simulated order (this handles the order processing flow, including payment and inventory)
+    processPendingOrder(simOrder, console);
+
+    // Add the simulated order to system records
+    dp.orders[dp.orderCount++] = simOrder;
+
+    // Show the status of the simulated order
+    System.out.print("Simulation Order " + simOrder.orderId + " created (Status: " + simOrder.status + ").\n");
+}
 
     /** Feature 8: Retry processing a failed (cancelled) order by creating a fresh attempt */
     private void retryCancelledOrder(BufferedReader console) throws Exception {
@@ -1009,7 +1028,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
         if (prod == null) {
             order.status = "CANCELLED";
             order.cancelReason = "Invalid product " + it.productId;
-            log.write(order.orderId, "Order cancelled – " + order.cancelReason);
+            log.write(order.orderId, "Order cancelled - " + order.cancelReason);
             return false;
         }
         if (prod.stock < it.quantity) {
@@ -1021,7 +1040,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
 
     if (!inventoryOK) {
         order.status = "CANCELLED";
-        log.write(order.orderId, "Order cancelled – " + order.cancelReason);
+        log.write(order.orderId, "Order cancelled -" + order.cancelReason);
         return false;
     }
 
@@ -1049,11 +1068,12 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
     boolean paymentSuccess;
     if (console == null) {
         paymentSuccess = order.paymentMode.equalsIgnoreCase("COD");
-        if (paymentSuccess) {
-            log.write(order.orderId, "PAYMENT OK (Imported COD)");
-        } else {
-            log.write(order.orderId, "PAYMENT FAIL (Imported auto decline)");
-        }
+        if (order.paymentMode.equalsIgnoreCase("COD")) {
+        log.write(order.orderId, "PAYMENT OK (COD)");
+       } else {
+        log.write(order.orderId, "PAYMENT FAIL (Auto decline for simulation)");
+        paymentSuccess = false;
+    }
     } else {
         paymentSuccess = paymentService.processPayment(order, console);
     }
@@ -1069,7 +1089,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
         }
         order.status = "CANCELLED";
         order.cancelReason = "Payment Declined";
-        log.write(order.orderId, "Order cancelled – " + order.cancelReason);
+        log.write(order.orderId, "Order cancelled - " + order.cancelReason);
         return false;
     }
 
