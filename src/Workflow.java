@@ -7,11 +7,17 @@ import java.util.Comparator;
 
 /** Workflow.java – Orchestrates order processing and provides the Admin Dashboard menu */
 public class Workflow {
-    // ANSI color codes for CLI output
-    private static final String ANSI_RED    = "\u001B[31m";
-    private static final String ANSI_GREEN  = "\u001B[32m";
-    private static final String ANSI_YELLOW = "\u001B[33m";
-    private static final String ANSI_RESET  = "\u001B[0m";
+    // Professional yet girlish pastel color codes for CLI output
+    public static final String ANSI_SOFT_CORAL   = "\u001B[38;5;215m"; // Soft coral for Pending
+    public static final String ANSI_LAVENDER_GRAY = "\u001B[38;5;183m"; // Lavender gray for Completed
+    public static final String ANSI_MUTED_PEACH  = "\u001B[38;5;215m"; // Muted peach for Shipped
+    public static final String ANSI_PASTEL_MINT  = "\u001B[38;5;156m"; // Pastel mint for Accepted
+    public static final String ANSI_DUSTY_ROSE   = "\u001B[38;5;172m"; // Dusty rose for Cancelled
+    public static final String ANSI_BACKGROUND   = "\u001B[48;5;231m"; // Soft pastel background
+    public static final String ANSI_BOLD         = "\u001B[1m";  // Bold text
+    public static final String ANSI_UNDERLINE    = "\u001B[4m";  // Underlined text
+    public static final String ANSI_RESET        = "\u001B[0m";  // Reset to default color
+    public static final String ANSI_Soft_Yellow ="\u001B[38;5;220m";
 
     private DataPersistence dp;
     private Log log;
@@ -30,70 +36,58 @@ public class Workflow {
 
     /** Admin Dashboard menu loop handling all features */
     public void adminDashboard(BufferedReader console) throws Exception {
-        System.out.print("\n===== Admin Dashboard =====\n");
+        System.out.print(ANSI_BACKGROUND + ANSI_SOFT_CORAL + ANSI_BOLD + "\n===== Admin Dashboard =====" + ANSI_RESET + "\n");
         while (true) {
-            // Display menu options
-            System.out.print("\nMenu:\n");
-            System.out.print("1.Accept New Order\n");
-            System.out.print("2.Update Order Status\n");
-            System.out.print("3.View Order Logs\n");
-            System.out.print("4.Search/Filter Orders\n");
-            System.out.print("5.Generate Receipt\n");
-           
-           
-            System.out.print("6.Advanced Product Filter\n");
-            System.out.print("7.Manage Products (Add/Edit/Delete)\n");
-            System.out.print("8.Low Stock Alerts\n");
-            System.out.print("9.Restock Product\n");
-            System.out.print("10.Export Stock Report\n");
-            System.out.print("11.Bulk Import Orders\n");
-            
+            // Display menu options with pastel theme
+            System.out.print(ANSI_LAVENDER_GRAY + "\nMenu:\n" + ANSI_RESET);
+            System.out.print("1. " + ANSI_SOFT_CORAL + "Accept New Order" + ANSI_RESET + "\n");
+            System.out.print("2. " + ANSI_PASTEL_MINT + "Update Order Status" + ANSI_RESET + "\n");
+            System.out.print("3. " + ANSI_MUTED_PEACH + "View Order Logs" + ANSI_RESET + "\n");
+            System.out.print("4. " + ANSI_LAVENDER_GRAY + "Search/Filter Orders" + ANSI_RESET + "\n");
+            System.out.print("5. " + ANSI_SOFT_CORAL + "Generate Receipt" + ANSI_RESET + "\n");
+            System.out.print("6. " + ANSI_MUTED_PEACH + "Advanced Product Filter" + ANSI_RESET + "\n");
+            System.out.print("7. " + ANSI_PASTEL_MINT + "Manage Products (Add/Edit/Delete)" + ANSI_RESET + "\n");
+            System.out.print("8. " + ANSI_DUSTY_ROSE + "Low Stock Alerts" + ANSI_RESET + "\n");
+            System.out.print("9. " + ANSI_SOFT_CORAL + "Restock Product" + ANSI_RESET + "\n");
+            System.out.print("10. " + ANSI_MUTED_PEACH + "Export Stock Report" + ANSI_RESET + "\n");
+            System.out.print("11. " + ANSI_LAVENDER_GRAY + "Bulk Import Orders" + ANSI_RESET + "\n");
+            System.out.print("12. " + ANSI_PASTEL_MINT + "Archive Delivered Orders" + ANSI_RESET + "\n");
+            System.out.print("13. " + ANSI_SOFT_CORAL + "Reorder Previous Order" + ANSI_RESET + "\n");
+            System.out.print("14. " + ANSI_MUTED_PEACH + "Retry Failed Order" + ANSI_RESET + "\n");
+            System.out.print("15. " + ANSI_PASTEL_MINT + "Clear Logs" + ANSI_RESET + "\n");
+            System.out.print("16. " + ANSI_DUSTY_ROSE + "Change Admin Password" + ANSI_RESET + "\n");
+            System.out.print("17. " + ANSI_SOFT_CORAL + "Generate Report" + ANSI_RESET + "\n");
+            System.out.print("18. " + ANSI_PASTEL_MINT + "Simulation Mode" + ANSI_RESET + "\n");
+            System.out.print("19. " + ANSI_MUTED_PEACH + "Load Test Data" + ANSI_RESET + "\n");
+            System.out.print("0. " + ANSI_DUSTY_ROSE + "Exit" + ANSI_RESET + "\n");
 
-            System.out.print("12.Archive Delivered Orders\n");
-            System.out.print("13.Reorder Previous Order\n");
-            System.out.print("14.Retry Failed Order\n");
-            
-            System.out.print("15.Clear Logs\n");
-            System.out.print("16.Change Admin Password\n");
-            
-            
-            System.out.print("17.Generate Report\n");
-            System.out.print("18.Simulation Mode\n");
-            System.out.print("19.Load Test Data\n");
-            
-            System.out.print("0. Exit\n");
-            System.out.print("Choose an option: ");
-            String choice = console.readLine();
+            System.out.print("\nPlease select an option: ");
+               String choice = console.readLine();
             if (choice == null) choice = "";
             choice = choice.trim();
             System.out.print("\n");
             switch (choice) {
-                case "1":  // New case for Accept New Order
-                acceptNewOrder(console);
-                break;
+                case "1": acceptNewOrder(console); break;
                 case "2": handleStatusUpdate(console); break;
                 case "3":
-             System.out.println("==== Available Orders (Sorted by Date) ====");
-    
-             // Sort orders by Date (ascending)
-             Order[] sortedOrders = Arrays.copyOf(dp.orders, dp.orderCount);
-             Arrays.sort(sortedOrders, Comparator.comparing(o -> o.date));  // Sort by Date
-
-             // Display the orders with Order ID and Date
-             for (Order order : sortedOrders) {
-             if (order != null) {
-             System.out.println(order.orderId + " | Date: " + order.date + " | Status: " + order.status);
-             }
-         }
-    
-             // Ask the admin to enter an Order ID to view logs
-              System.out.print("Enter Order ID to view logs: ");
-              String logId = console.readLine();
-             if (logId != null && !logId.trim().equals("")) {
-             logId = normalizeOrderId(logId.trim());
-             log.viewLogsByOrder(logId);  // View logs for the selected Order ID
-         }
-            break;
+                    System.out.println("==== Available Orders (Sorted by Date) ====");
+                    // Sort orders by Date (ascending)
+                    Order[] sortedOrders = Arrays.copyOf(dp.orders, dp.orderCount);
+                    Arrays.sort(sortedOrders, Comparator.comparing(o -> o.date));  // Sort by Date
+                    // Display the orders with Order ID and Date
+                    for (Order order : sortedOrders) {
+                        if (order != null) {
+                            System.out.println(order.orderId + " | Date: " + order.date + " | Status: " + order.status);
+                        }
+                    }
+                    // Ask the admin to enter an Order ID to view logs
+                    System.out.print("Enter Order ID to view logs: ");
+                    String logId = console.readLine();
+                    if (logId != null && !logId.trim().equals("")) {
+                        logId = normalizeOrderId(logId.trim());
+                        log.viewLogsByOrder(logId);  // View logs for the selected Order ID
+                    }
+                    break;
 
                 case "4": handleOrderSearch(console); break;
                 case "5": generateReceipt(console); break;
@@ -105,7 +99,7 @@ public class Workflow {
                 case "11": importOrdersFromFile(console); break;
                 case "12": archiveDeliveredOrders(console); break;
                 case "13": handleReorder(console); break;
-                case "14": retryCancelledOrder(console);break;
+                case "14": retryCancelledOrder(console); break;
                 case "15": clearLogs(console); break;
                 case "16": changeAdminPassword(console); break;
                 case "17": generateReport(); break;
@@ -121,15 +115,14 @@ public class Workflow {
                         System.out.print("-> " + dp.productCount + " products loaded.\n");
                         System.out.print("-> " + dp.orderCount + " orders loaded.\n");
                         System.out.print("-> " + dp.adminCount + " admins loaded.\n");
-
                     }
                     break;
                 
                 case "0":
-                    System.out.print("Exiting Admin Dashboard...\n");
+                    System.out.print(ANSI_DUSTY_ROSE + "Exiting Admin Dashboard..." + ANSI_RESET + "\n");
                     return;
                 default:
-                    System.out.print("Invalid option. Please try again.\n");
+                    System.out.print(ANSI_DUSTY_ROSE + "Invalid option. Please try again." + ANSI_RESET + "\n");
                     break;
             }
             System.out.print("\n--------------------------------\n");
@@ -192,9 +185,13 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                 // Prepare status string (with color coding for output if available)
                 String statusStr = o.status;
                 if (statusStr.equals("DELIVERED")) {
-                    statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
+                    statusStr = ANSI_LAVENDER_GRAY + statusStr + ANSI_RESET; // Lavender for Delivered
                 } else if (statusStr.equals("CANCELLED")) {
-                    statusStr = ANSI_RED + statusStr + ANSI_RESET;
+                    statusStr = ANSI_DUSTY_ROSE + statusStr + ANSI_RESET; // Dusty Rose for Cancelled
+                } else if (statusStr.equals("PENDING")) {
+                    statusStr = ANSI_SOFT_CORAL + statusStr + ANSI_RESET; // Soft Coral for Pending
+                } else if (statusStr.equals("SHIPPED")) {
+                    statusStr = ANSI_MUTED_PEACH + statusStr + ANSI_RESET; // Muted Peach for Shipped
                 }
                 // Print order summary line with relevant details
                 System.out.print("- " + o.orderId + " | Date: " + o.date 
@@ -202,7 +199,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                                  + " | Status: " + statusStr 
                                  + " | Total: BDT " + o.totalAmount);
                 if (o.status.equals("CANCELLED") && o.cancelReason != null && !o.cancelReason.equals("")) {
-                    System.out.print(" | CancelReason: " + o.cancelReason);
+                    System.out.print(" | CancelReason: " + ANSI_DUSTY_ROSE + o.cancelReason + ANSI_RESET); // Cancel reason in pastel purple
                 }
                 System.out.print("\n");
             }
@@ -269,14 +266,18 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                 Order o = results[i];
                 String statusStr = o.status;
                 if (statusStr.equals("DELIVERED")) {
-                    statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
+                    statusStr = ANSI_LAVENDER_GRAY + statusStr + ANSI_RESET; // Lavender for Delivered
                 } else if (statusStr.equals("CANCELLED")) {
-                    statusStr = ANSI_RED + statusStr + ANSI_RESET;
+                    statusStr = ANSI_DUSTY_ROSE + statusStr + ANSI_RESET; // Dusty Rose for Cancelled
+                } else if (statusStr.equals("PENDING")) {
+                    statusStr = ANSI_SOFT_CORAL + statusStr + ANSI_RESET; // Soft Coral for Pending
+                } else if (statusStr.equals("SHIPPED")) {
+                    statusStr = ANSI_MUTED_PEACH + statusStr + ANSI_RESET; // Muted Peach for Shipped
                 }
                 System.out.print("- " + o.orderId + " | Status: " + statusStr 
                                  + " | Total: BDT " + o.totalAmount);
                 if (o.cancelReason != null && !o.cancelReason.equals("")) {
-                    System.out.print(" | CancelReason: " + o.cancelReason);
+                    System.out.print(" | CancelReason: " + ANSI_DUSTY_ROSE + o.cancelReason + ANSI_RESET); // Cancel reason in pastel purple
                 }
                 System.out.print("\n");
             }
@@ -304,6 +305,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         }
     }
 }
+
 
     /** Feature 6: Manually progress an order status through the workflow (PENDING -> PACKED -> SHIPPED -> OUT_FOR_DELIVERY -> DELIVERED) */
     private void handleStatusUpdate(BufferedReader console) throws Exception {
@@ -472,7 +474,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
             if (p.stock < 5) {
                 anyLow = true;
                 // Highlight low stock product in yellow
-                System.out.print(ANSI_YELLOW + p.productId + " | " + p.name + " | Stock: " + p.stock + ANSI_RESET + "\n");
+                System.out.print(ANSI_Soft_Yellow+ p.productId + " | " + p.name + " | Stock: " + p.stock + ANSI_RESET + "\n");
             }
         }
         if (!anyLow) {
