@@ -157,7 +157,7 @@ public class DataPersistence {
         fw.close();
     }
 
-   private void saveOrders() throws Exception {
+   public void saveOrders() throws Exception {
     // Open the file for writing (overwrite the file)
     FileWriter fw = new FileWriter(path("orders.txt"), false);  // 'false' to overwrite
 

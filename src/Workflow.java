@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /** Workflow.java – Orchestrates order processing and provides the Admin Dashboard menu */
 public class Workflow {
@@ -71,13 +73,28 @@ public class Workflow {
                 break;
                 case "2": handleStatusUpdate(console); break;
                 case "3":
-                    System.out.print("Enter Order ID to view logs: ");
-                    String logId = console.readLine();
-                    if (logId != null && !logId.trim().equals("")) {
-                        logId = normalizeOrderId(logId.trim());
-                        log.viewLogsByOrder(logId);
-                    }
-                    break;
+             System.out.println("==== Available Orders (Sorted by Date) ====");
+    
+             // Sort orders by Date (ascending)
+             Order[] sortedOrders = Arrays.copyOf(dp.orders, dp.orderCount);
+             Arrays.sort(sortedOrders, Comparator.comparing(o -> o.date));  // Sort by Date
+
+             // Display the orders with Order ID and Date
+             for (Order order : sortedOrders) {
+             if (order != null) {
+             System.out.println(order.orderId + " | Date: " + order.date + " | Status: " + order.status);
+             }
+         }
+    
+             // Ask the admin to enter an Order ID to view logs
+              System.out.print("Enter Order ID to view logs: ");
+              String logId = console.readLine();
+             if (logId != null && !logId.trim().equals("")) {
+             logId = normalizeOrderId(logId.trim());
+             log.viewLogsByOrder(logId);  // View logs for the selected Order ID
+         }
+            break;
+
                 case "4": handleOrderSearch(console); break;
                 case "5": generateReceipt(console); break;
                 case "6": handleAdvancedFilter(console); break;
