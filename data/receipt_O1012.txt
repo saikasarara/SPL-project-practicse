@@ -1,0 +1,9 @@
+Receipt for Order O1012
+Address: SimulatedAddress
+Status: DELIVERED
+Tracking ID: (Unavailable)
+Items:
+- Galaxy A14 (4/64) (x1 @ BDT 19999 each)
+--------------------------------------
+Total Paid: BDT 0
+Thank you for your purchase!

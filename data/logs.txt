@@ -22,3 +22,9 @@ Order O1008 - Order cancelled – Inventory Shortage: M101
 Order O1009 - Order cancelled – Inventory Shortage: M101
 Order O1010 - Order cancelled – Inventory Shortage: M102
 Order O1011 - Order cancelled – Inventory Shortage: M101
+Order O1012 - Simulated successful order created (DELIVERED)
+Order O1012 - Simulation completed for Order: O1012
+Order O1013 - Simulated order created (Payment Failure)
+Order O1013 - Simulation completed for Order: O1013
+Order O1014 - Simulated successful order created (DELIVERED)
+Order O1014 - Simulation completed for Order: O1014
