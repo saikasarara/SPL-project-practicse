@@ -120,171 +120,242 @@ public class Workflow {
     }
 
 private void handleOrderSearch(BufferedReader console) throws Exception {
-    System.out.print("Enter Order ID (e.g. O1001) or full Status (e.g. DELIVERED): ");
+    System.out.print("Enter Order ID or Status to search (or press Enter for advanced filter): ");
     String query = console.readLine();
     if (query == null) query = "";
-    query = query.trim().toUpperCase();
+    query = query.trim();
     if (query.equals("")) {
-        System.out.print("Search query cannot be empty.\n");
-        return;
-    }
-
-    // Normalize numeric ID like 1001 into O1001
-    if (!query.startsWith("O") && isNumeric(query)) {
-        query = "O" + query;
-    }
-
-    // === Try Exact Order ID Match First ===
-    for (int i = 0; i < dp.orderCount; i++) {
-        Order o = dp.orders[i];
-        if (o != null && o.orderId.equalsIgnoreCase(query)) {
-            System.out.print("\n=== Order Found ===\n");
-            viewOrderDetails(o);
-            return;
-        }
-    }
-
-    // === Ask for Optional Filters ===
-    System.out.print("Also filter by Payment Mode? (Y/N): ");
-    String payOpt = console.readLine();
-    String payMode = null;
-    if (payOpt != null && payOpt.trim().equalsIgnoreCase("Y")) {
-        System.out.print("Enter mode (COD/MockCard): ");
-        payMode = console.readLine();
-        if (payMode == null) payMode = "";
-        payMode = payMode.trim();
-    }
-
-    System.out.print("Also filter by Order Date? (Y/N): ");
-    String dateOpt = console.readLine();
-    String dateFilter = null;
-    if (dateOpt != null && dateOpt.trim().equalsIgnoreCase("Y")) {
-        System.out.print("Enter date (YYYY-MM-DD): ");
-        dateFilter = console.readLine();
+        // Advanced filtering by multiple criteria
+        System.out.print("Enter Status to filter (or press Enter for any): ");
+        String statusFilter = console.readLine();
+        if (statusFilter == null) statusFilter = "";
+        statusFilter = statusFilter.trim();
+        System.out.print("Enter Payment Mode to filter (or press Enter for any): ");
+        String paymentFilter = console.readLine();
+        if (paymentFilter == null) paymentFilter = "";
+        paymentFilter = paymentFilter.trim();
+        System.out.print("Enter Date to filter (YYYY-MM-DD, or press Enter for any): ");
+        String dateFilter = console.readLine();
         if (dateFilter == null) dateFilter = "";
         dateFilter = dateFilter.trim();
-    }
-
-    // === Apply Combined Filters ===
-    Order[] results = new Order[dp.orderCount];
-    int count = 0;
-
-    for (int i = 0; i < dp.orderCount; i++) {
-        Order o = dp.orders[i];
-        if (o == null) continue;
-
-        boolean matchStatus = o.status.equalsIgnoreCase(query);
-        boolean matchPayment = (payMode == null || o.paymentMode.equalsIgnoreCase(payMode));
-        boolean matchDate = (dateFilter == null || o.date.equals(dateFilter));
-
-        if (matchStatus && matchPayment && matchDate) {
+        // Convert filters to uppercase for comparison (except date which is numeric string)
+        String statusFilterUC = statusFilter.toUpperCase();
+        String paymentFilterUC = paymentFilter.toUpperCase();
+        Order[] results = new Order[dp.orderCount];
+        int count = 0;
+        for (int i = 0; i < dp.orderCount; i++) {
+            Order o = dp.orders[i];
+            if (o == null) continue;
+            // Apply status filter if provided
+            if (!statusFilterUC.equals("") && !o.status.toUpperCase().equals(statusFilterUC)) {
+                continue;
+            }
+            // Apply payment filter if provided
+            if (!paymentFilterUC.equals("") && !o.paymentMode.toUpperCase().equals(paymentFilterUC)) {
+                continue;
+            }
+            // Apply date filter if provided
+            if (!dateFilter.equals("") && !o.date.equals(dateFilter)) {
+                continue;
+            }
+            // If all specified criteria match, include this order
             results[count++] = o;
         }
-    }
-
-    if (count == 0) {
-        System.out.print("No orders found matching those filters.\n");
+        if (count == 0) {
+            System.out.print("No orders found matching the given criteria.\n");
+        } else {
+            // Display summary of orders that matched all filters
+            String statusCrit = statusFilter.equals("") ? "Any" : statusFilter;
+            String payCrit = paymentFilter.equals("") ? "Any" : paymentFilter;
+            String dateCrit = dateFilter.equals("") ? "Any" : dateFilter;
+            System.out.print("Orders matching filters - Status: " + statusCrit 
+                               + ", Payment: " + payCrit + ", Date: " + dateCrit + ":\n");
+            for (int i = 0; i < count; i++) {
+                Order o = results[i];
+                // Prepare status string (with color coding for output if available)
+                String statusStr = o.status;
+                if (statusStr.equals("DELIVERED")) {
+                    statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
+                } else if (statusStr.equals("CANCELLED")) {
+                    statusStr = ANSI_RED + statusStr + ANSI_RESET;
+                }
+                // Print order summary line with relevant details
+                System.out.print("- " + o.orderId + " | Date: " + o.date 
+                                 + " | Payment: " + o.paymentMode 
+                                 + " | Status: " + statusStr 
+                                 + " | Total: BDT " + o.totalAmount);
+                if (o.status.equals("CANCELLED") && o.cancelReason != null && !o.cancelReason.equals("")) {
+                    System.out.print(" | CancelReason: " + o.cancelReason);
+                }
+                System.out.print("\n");
+            }
+            // Optionally allow viewing details of one order from the results
+            System.out.print("Enter Order ID to view details (or press Enter to skip): ");
+            String selId = console.readLine();
+            if (selId == null) selId = "";
+            selId = selId.trim();
+            if (!selId.equals("")) {
+                selId = normalizeOrderId(selId);
+                Order target = null;
+                for (int i = 0; i < dp.orderCount; i++) {
+                    Order o = dp.orders[i];
+                    if (o != null && o.orderId.equalsIgnoreCase(selId)) {
+                        target = o;
+                        break;
+                    }
+                }
+                if (target != null) {
+                    viewOrderDetails(target);
+                } else {
+                    System.out.print("Order " + selId + " not found in results.\n");
+                }
+            }
+        }
         return;
     }
 
-    // === Display Results ===
-    System.out.print("\nOrders matching filters:\n");
-    for (int i = 0; i < count; i++) {
-        Order o = results[i];
-        String statusStr = o.status;
-        if (statusStr.equals("DELIVERED")) {
-            statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
-        } else if (statusStr.equals("CANCELLED")) {
-            statusStr = ANSI_RED + statusStr + ANSI_RESET;
-        } else if (statusStr.equals("PACKED") || statusStr.equals("SHIPPED") || statusStr.equals("OUT_FOR_DELIVERY")) {
-            statusStr = ANSI_YELLOW + statusStr + ANSI_RESET;
-        }
-        System.out.print("- " + o.orderId + " | " + o.date + " | " + statusStr + " | Payment: " + o.paymentMode + " | Total: BDT " + o.totalAmount);
-        if (o.cancelReason != null && !o.cancelReason.equals("")) {
-            System.out.print(" | CancelReason: " + o.cancelReason);
-        }
-        System.out.print("\n");
+    // Standard search by Order ID or Status (existing functionality)
+    String q = query.toUpperCase();
+    // If input is numeric, normalize to OrderID format (e.g., "1001" -> "O1001")
+    if (!q.startsWith("O") && isNumeric(q)) {
+        q = "O" + q;
     }
-
-    System.out.print("\nEnter Order ID to view details (or press Enter to skip): ");
-    String selId = console.readLine();
-    if (selId != null && !selId.trim().equals("")) {
-        selId = normalizeOrderId(selId.trim());
-        for (int i = 0; i < count; i++) {
-            if (results[i].orderId.equalsIgnoreCase(selId)) {
-                viewOrderDetails(results[i]);
-                return;
+    // Try to find an exact Order ID match
+    Order found = null;
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o != null && o.orderId.toUpperCase().equals(q)) {
+            found = o;
+            break;
+        }
+    }
+    if (found != null) {
+        // Show full details for the matched order ID
+        viewOrderDetails(found);
+    } else {
+        // Treat the input as a status query (substring match on status)
+        String statusQuery = q;
+        Order[] results = new Order[dp.orderCount];
+        int count = 0;
+        for (int i = 0; i < dp.orderCount; i++) {
+            Order o = dp.orders[i];
+            if (o == null) continue;
+            if (o.status.toUpperCase().contains(statusQuery)) {
+                results[count++] = o;
             }
         }
-        System.out.print("Order " + selId + " not found in filtered list.\n");
+        if (count == 0) {
+            System.out.print("No orders found matching \"" + query + "\".\n");
+        } else {
+            System.out.print("Orders with status containing \"" + query + "\":\n");
+            for (int i = 0; i < count; i++) {
+                Order o = results[i];
+                String statusStr = o.status;
+                if (statusStr.equals("DELIVERED")) {
+                    statusStr = ANSI_GREEN + statusStr + ANSI_RESET;
+                } else if (statusStr.equals("CANCELLED")) {
+                    statusStr = ANSI_RED + statusStr + ANSI_RESET;
+                }
+                System.out.print("- " + o.orderId + " | Status: " + statusStr 
+                                 + " | Total: BDT " + o.totalAmount);
+                if (o.cancelReason != null && !o.cancelReason.equals("")) {
+                    System.out.print(" | CancelReason: " + o.cancelReason);
+                }
+                System.out.print("\n");
+            }
+            // Allow viewing details of a selected order from the list
+            System.out.print("Enter Order ID to view details (or press Enter to skip): ");
+            String selId = console.readLine();
+            if (selId == null) selId = "";
+            selId = selId.trim();
+            if (!selId.equals("")) {
+                selId = normalizeOrderId(selId);
+                Order target = null;
+                for (int i = 0; i < dp.orderCount; i++) {
+                    Order o = dp.orders[i];
+                    if (o != null && o.orderId.equalsIgnoreCase(selId)) {
+                        target = o;
+                        break;
+                    }
+                }
+                if (target != null) {
+                    viewOrderDetails(target);
+                } else {
+                    System.out.print("Order " + selId + " not found in results.\n");
+                }
+            }
+        }
     }
 }
 
-
     /** Feature 6: Manually progress an order status through the workflow (PENDING -> PACKED -> SHIPPED -> OUT_FOR_DELIVERY -> DELIVERED) */
     private void handleStatusUpdate(BufferedReader console) throws Exception {
-        System.out.print("Enter Order ID to update status: ");
-        String id = console.readLine();
-        if (id == null) id = "";
-        id = id.trim();
-        if (id.equals("")) {
-            System.out.print("Order ID cannot be empty.\n");
-            return;
-        }
-        id = normalizeOrderId(id);
-        // Find the order by ID
-        Order order = null;
-        for (int i = 0; i < dp.orderCount; i++) {
-            Order o = dp.orders[i];
-            if (o != null && o.orderId.equalsIgnoreCase(id)) {
-                order = o;
-                break;
-            }
-        }
-        if (order == null) {
-            System.out.print("Order " + id + " not found.\n");
-            return;
-        }
-        // If order already delivered or cancelled, cannot change
-        String currentStatus = order.status;
-        if (currentStatus.equals("DELIVERED") || currentStatus.equals("CANCELLED")) {
-            System.out.print("Order " + id + " is " + currentStatus + "; status cannot be changed.\n");
-            return;
-        }
-        // If order is still PENDING, first process it through inventory & payment
-        if (currentStatus.equals("PENDING")) {
-            boolean processed = processPendingOrder(order, console);
-            if (!processed) {
-                // If processing failed, order status is now CANCELLED (reason logged in processPendingOrder)
-                System.out.print("Order processing failed. Status updated to CANCELLED (" + order.cancelReason + ").\n");
-                return;
-            }
-            // If processing succeeded, status is now PACKED
-            currentStatus = order.status;
-        }
-        // Determine the next status in sequence
-        String nextStatus = null;
-        if (currentStatus.equals("PACKED")) {
-            nextStatus = "SHIPPED";
-        } else if (currentStatus.equals("SHIPPED")) {
-            nextStatus = "OUT_FOR_DELIVERY";
-        } else if (currentStatus.equals("OUT_FOR_DELIVERY")) {
-            nextStatus = "DELIVERED";
-        }
-        if (nextStatus == null) {
-            System.out.print("No further status transition available for " + currentStatus + ".\n");
-            return;
-        }
-        // Perform the status transition
-        order.status = nextStatus;
-        if (nextStatus.equals("SHIPPED")) {
-            // Assign a tracking ID when order is shipped
-            order.trackingId = "TRK" + order.orderId.substring(1);
-        }
-        // (If nextStatus is DELIVERED, we leave the data as is until it is archived)
-        log.write(order.orderId, "Status changed to " + nextStatus);
-        System.out.print("Order " + order.orderId + " status updated to " + nextStatus + ".\n");
+    System.out.print("Enter Order ID to update status: ");
+    String id = console.readLine();
+    if (id == null) id = "";
+    id = id.trim();
+    if (id.equals("")) {
+        System.out.print("Order ID cannot be empty.\n");
+        return;
     }
+    id = normalizeOrderId(id);
+    // Find the order by ID
+    Order order = null;
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o != null && o.orderId.equalsIgnoreCase(id)) {
+            order = o;
+            break;
+        }
+    }
+    if (order == null) {
+        System.out.print("Order " + id + " not found.\n");
+        return;
+    }
+    String currentStatus = order.status;
+    // If order already delivered or cancelled, no further updates allowed
+    if (currentStatus.equals("DELIVERED") || currentStatus.equals("CANCELLED")) {
+        System.out.print("Order " + id + " is " + currentStatus + "; status cannot be changed.\n");
+        return;
+    }
+    // If order is PENDING, attempt to process it (inventory check & payment)
+    if (currentStatus.equals("PENDING")) {
+        boolean processed = processPendingOrder(order, console);
+        if (!processed) {
+            // If processing failed, order status is now CANCELLED (reason set in processPendingOrder)
+            System.out.print("Order processing failed. Status updated to CANCELLED (" 
+                             + order.cancelReason + ").\n");
+            dp.saveOrders();
+            return;
+        }
+        // If processing succeeded, the order status is now PACKED
+        currentStatus = order.status;
+    }
+    // Determine the next status in the workflow sequence
+    String nextStatus = null;
+    if (currentStatus.equals("PACKED")) {
+        nextStatus = "SHIPPED";
+    } else if (currentStatus.equals("SHIPPED")) {
+        nextStatus = "OUT_FOR_DELIVERY";
+    } else if (currentStatus.equals("OUT_FOR_DELIVERY")) {
+        nextStatus = "DELIVERED";
+    }
+    if (nextStatus == null) {
+        System.out.print("No further status transition available for " + currentStatus + ".\n");
+        return;
+    }
+    // Update order status to the next stage
+    order.status = nextStatus;
+    if (nextStatus.equals("SHIPPED")) {
+        // Assign a tracking ID once the order is shipped
+        order.trackingId = "TRK" + order.orderId.substring(1);  // e.g., O1005 -> TRK1005
+    }
+    // Persist the updated orders list to file
+    dp.saveOrders();
+    log.write(order.orderId, "Status changed to " + nextStatus);
+    System.out.print("Order " + order.orderId + " status updated to " + nextStatus + ".\n");
+}
+
 
     /** Feature 5 & 8: Reorder a previous order (copy its items into a new order and process it) */
     private void handleReorder(BufferedReader console) throws Exception {

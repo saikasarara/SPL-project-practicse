@@ -157,16 +157,47 @@ public class DataPersistence {
         fw.close();
     }
 
-    private void saveOrders() throws Exception {
-        FileWriter fw = new FileWriter(path("orders.txt"), false);
-        for (int i = 0; i < orderCount; i++) {
-            Order o = orders[i];
-            if (o == null) continue;
-            // Do not save orders that have been archived (they would have been removed from array)
-            fw.write(o.toRecord() + "\n");
+   private void saveOrders() throws Exception {
+    // Open the file for writing (overwrite the file)
+    FileWriter fw = new FileWriter(path("orders.txt"), false);  // 'false' to overwrite
+
+    // Iterate through all orders and write them to the file
+    for (int i = 0; i < orderCount; i++) {
+        Order o = orders[i];
+        if (o == null) continue;  // Skip null orders
+
+        // Format and write each order as: OrderID|Date|Address|PaymentMode|Status|ItemList|TotalAmount|CancelReason
+        fw.write(o.orderId + "|" + o.date + "|" + o.address + "|" + o.paymentMode + "|" 
+                 + o.status + "|" + o.totalAmount);  // Write order basic details
+
+        // Prepare the item list in the format "ProductIDxQuantity, ProductIDxQuantity, ..."
+        StringBuilder itemList = new StringBuilder();
+        for (int j = 0; j < o.itemCount; j++) {
+            Item item = o.items[j];
+            if (item != null) {
+                itemList.append(item.productId).append("x").append(item.quantity);
+                if (j < o.itemCount - 1) {
+                    itemList.append(",");  // Add comma between items
+                }
+            }
         }
-        fw.close();
+
+        // Write item list to the order record
+        fw.write("|" + itemList.toString());
+
+        // If the order was canceled, write the cancel reason
+        if (o.cancelReason != null && !o.cancelReason.isEmpty()) {
+            fw.write("|" + o.cancelReason);  // Add cancellation reason if present
+        }
+
+        // End the order record with a new line
+        fw.write("\n");
     }
+
+    // Close the FileWriter after writing all orders
+    fw.close();
+    System.out.println("Orders saved successfully to orders.txt");
+}
 
     private void saveAdmins() throws Exception {
         FileWriter fw = new FileWriter(path("admins.txt"), false);
