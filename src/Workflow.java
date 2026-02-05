@@ -585,6 +585,8 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         // Mark the order as cancelled due to payment failure
         simOrder.status = "CANCELLED"; // Simulate failure
         simOrder.cancelReason = "Payment Failure (MockCard)";
+        // Log the creation of the order and cancellation reason
+        log.write(simOrder.orderId, "Simulated order created (Payment Failure)");
 
     } else if (opt.equals("3")) {
         // Scenario 3: Inventory shortage – order more than available stock
@@ -606,6 +608,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         // Mark the order as cancelled due to inventory shortage
         simOrder.status = "CANCELLED"; // Simulate cancellation
         simOrder.cancelReason = "Inventory Shortage";
+        log.write(simOrder.orderId, "Simulated order created (Inventory Shortage)");
 
     } else {
         // Scenario 1 or 4: Successful or Random order – pick 1-2 random items
@@ -625,6 +628,8 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
         // Successful order – set the status as "DELIVERED"
         simOrder.status = "DELIVERED"; // Mark as delivered for successful order
+        // Log the creation of the order and status change
+        log.write(simOrder.orderId, "Simulated successful order created (DELIVERED)");
     }
 
     simOrder.address = "SimulatedAddress"; // Assign a sample address
@@ -637,6 +642,8 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
     // Show the status of the simulated order
     System.out.print("Simulation Order " + simOrder.orderId + " created (Status: " + simOrder.status + ").\n");
+    // Log the order creation
+    log.write(simOrder.orderId, "Simulation completed for Order: " + simOrder.orderId);
 }
 
     /** Feature 8: Retry processing a failed (cancelled) order by creating a fresh attempt */
