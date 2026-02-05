@@ -146,7 +146,7 @@ public class DataPersistence {
         saveAdmins();
     }
 
-    private void saveProducts() throws Exception {
+    public void saveProducts() throws Exception {
         FileWriter fw = new FileWriter(path("products.txt"), false);  // overwrite file
         for (int i = 0; i < productCount; i++) {
             Product p = products[i];
@@ -196,7 +196,6 @@ public class DataPersistence {
 
     // Close the FileWriter after writing all orders
     fw.close();
-    System.out.println("Orders saved successfully to orders.txt");
 }
 
     private void saveAdmins() throws Exception {

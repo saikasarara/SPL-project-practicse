@@ -1,12 +1,15 @@
-O1001|2026-02-01|Dhaka|COD|DELIVERED|10114012||# Delivered order (COD)
-O1002|2026-02-02|Chittagong|COD|CANCELLED|20110||Inventory Shortage   # Cancelled due to stock shortage
-O1003|2026-02-03|Sylhet|MockCard|PENDING|4021||# Pending order (awaiting processing, MockCard)
-O1004|2026-02-03|Dhaka|MockCard|CANCELLED|1032||Payment Declined  # Cancelled due to payment failure
-O1006|2026-02-04|Dhaka|COD|DELIVERED|-868159815|
-O1007|2026-02-04|Dhaka|COD|OUT_FOR_DELIVERY|1011|
-O1008|2026-02-05|SimulatedAddress|COD|CANCELLED|1011||Inventory Shortage: M101
-O1009|2026-02-05|SimulatedAddress|MockCard|CANCELLED|1011||Inventory Shortage: M101
-O1010|2026-02-05|SimulatedAddress|COD|CANCELLED|1026||Inventory Shortage: M102
-O1011|2026-02-05|SimulatedAddress|COD|CANCELLED|10111021||Inventory Shortage: M101
-O1012|2026-02-05|SimulatedAddress|COD|CANCELLED|0|M101x1|Inventory Shortage: M101
-O1013|2026-02-05|SimulatedAddress|COD|CANCELLED|0|M101x1|Inventory Shortage: M101
+O1001|2026-02-01|Dhaka|COD|DELIVERED|0||# Delivered order (COD)
+O1002|2026-02-02|Chittagong|COD|CANCELLED|0||Inventory Shortage   # Cancelled due to stock shortage
+O1003|2026-02-03|Sylhet|MockCard|PENDING|0||# Pending order (awaiting processing, MockCard)
+O1004|2026-02-03|Dhaka|MockCard|CANCELLED|0||Payment Declined  # Cancelled due to payment failure
+O1006|2026-02-04|Dhaka|COD|DELIVERED|0|
+O1007|2026-02-04|Dhaka|COD|OUT_FOR_DELIVERY|0|
+O1008|2026-02-05|SimulatedAddress|COD|CANCELLED|0||Inventory Shortage: M101
+O1009|2026-02-05|SimulatedAddress|MockCard|CANCELLED|0||Inventory Shortage: M101
+O1010|2026-02-05|SimulatedAddress|COD|CANCELLED|0||Inventory Shortage: M102
+O1011|2026-02-05|SimulatedAddress|COD|CANCELLED|0||Inventory Shortage: M101
+O1012|2026-02-05|SimulatedAddress|COD|CANCELLED|1011||Inventory Shortage: M101
+O1013|2026-02-05|SimulatedAddress|COD|CANCELLED|1011||Inventory Shortage: M101
+O1014|2026-02-05|SimulatedAddress|COD|DELIVERED|0|M101x1
+O1015|2026-02-05|Dhaka|COD|CANCELLED|0|M101x2|Inventory Shortage: M101
+O1016|2026-02-05|Dhaka|COD|DELIVERED|899955|M101x45

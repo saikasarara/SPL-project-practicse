@@ -853,6 +853,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         }
         product.stock += addQty;
         System.out.print("Product " + product.productId + " restocked. New stock: " + product.stock + "\n");
+        dp.saveProducts();
         log.write("ADMIN", "Restocked " + product.productId + " (+" + addQty + ")");
     }
 

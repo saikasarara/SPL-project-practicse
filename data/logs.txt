@@ -34,3 +34,19 @@ Order O1012 - Simulation order with status: CANCELLED
 Order O1013 - Order cancelled -Inventory Shortage: M101
 Order O1013 - Simulation order created (Status: CANCELLED)
 Order O1013 - Simulation order with status: CANCELLED
+Order O1014 - Simulation order with status: DELIVERED
+Order O1015 - Order created via admin interface (pending)
+Order O1015 - Order cancelled -Inventory Shortage: M101
+Order ADMIN - Restocked M101 (+50)
+Order O1016 - Order created via admin interface (pending)
+Order O1016 - Inventory OK – stock reserved
+Order O1016 - PAYMENT OK (Cash on Delivery)
+Order O1016 - Status changed to PACKED
+Order O1016 - Status changed to SHIPPED
+Order O1016 - Status changed to OUT_FOR_DELIVERY
+Order O1016 - Status changed to DELIVERED
+Order O1017 - Order created via admin interface (pending)
+Order O1017 - Inventory OK – stock reserved
+Order O1017 - PAYMENT OK (Cash on Delivery)
+Order O1017 - Status changed to PACKED
+Order ADMIN - Restocked M101 (+23)
