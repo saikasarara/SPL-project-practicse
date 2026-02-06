@@ -4,51 +4,67 @@ import java.security.MessageDigest;
 /** Admin.java – Admin model and authentication logic (password hashing for secure login) */
 public class Admin {
     public String username;
-    public String passHash;  // stored password hash (hex string)
+    public String passHash;  // Hashed password
+    public Role role;  // User role (e.g., ADMIN, MANAGER, SUPPORT)
 
+    // Constructor to initialize the Admin object
+    public Admin(String username, String passHash, Role role) {
+        this.username = username;
+        this.passHash = passHash;
+        this.role = role;
+    }
+
+        // (optional) if you still use old 2-arg constructor anywhere
     public Admin(String username, String passHash) {
         this.username = username;
         this.passHash = passHash;
+        this.role = Role.ADMIN; // default
+    }
+      public boolean hasPermission(Role required) {
+        return this.role == required;
     }
 
-    /** Authenticate an admin login (allows 3 attempts). Returns true if successful. */
-    public static boolean authenticate(DataPersistence dp, BufferedReader console) throws Exception {
-        System.out.print("\n=== Admin Login ===\n");
-        int attempts = 0;
-        while (attempts < 3) {
-            // Prompt for credentials
-            System.out.print("Username: ");
-            String u = console.readLine();
-            if (u == null) u = "";
-            u = u.trim();
-            System.out.print("Password: ");
-            String p = console.readLine();
-            if (p == null) p = "";
-            p = p.trim();
-            // Verify credentials against all admin accounts
-            boolean authenticated = false;
-            for (int i = 0; i < dp.adminCount; i++) {
-                Admin adm = dp.admins[i];
-                if (adm != null && adm.username.equals(u) && adm.passHash.equals(hashPassword(p))) {
-                    dp.currentAdminIndex = i;  // store which admin logged in
-                    authenticated = true;
-                    break;
-                }
-            }
-            if (authenticated) {
-                System.out.print("Login successful.\n");
-                return true;
-            } else {
-                System.out.print("Invalid credentials. ");
-                attempts++;
-                if (attempts < 3) {
-                    System.out.print("Try again.\n");
-                }
+public static boolean authenticate(DataPersistence dp, BufferedReader console) throws Exception {
+    System.out.print("\n=== Admin Login ===\n");
+    int attempts = 0;
+
+    while (attempts < 3) {
+        System.out.print("Username: ");
+        String u = console.readLine();
+        if (u == null) u = "";
+        u = u.trim();
+
+        System.out.print("Password: ");
+        String p = console.readLine();
+        if (p == null) p = "";
+        p = p.trim();
+
+        int foundIndex = -1;
+
+        for (int i = 0; i < dp.adminCount; i++) {
+            Admin adm = dp.admins[i];
+            if (adm != null && adm.username.equals(u) && adm.passHash.equals(hashPassword(p))) {
+                foundIndex = i;
+                break;
             }
         }
-        System.out.print("\nToo many failed attempts.\n");
-        return false;
+
+        if (foundIndex != -1) {
+            dp.currentAdminIndex = foundIndex;
+            Admin admin = dp.admins[foundIndex];
+            System.out.println("Login successful. Role: " + admin.role);
+            return true;
+        } else {
+            System.out.print("Invalid credentials. ");
+            attempts++;
+            if (attempts < 3) System.out.print("Try again.\n");
+        }
     }
+
+    System.out.print("\nToo many failed attempts.\n");
+    return false;
+}
+
 
     /** Compute SHA-256 hash of a plaintext password and return hex string */
     public static String hashPassword(String password) {
@@ -69,4 +85,5 @@ public class Admin {
             return password;
         }
     }
+    
 }

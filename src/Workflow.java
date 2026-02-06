@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
 
+
+
 /** Workflow.java – Orchestrates order processing and provides the Admin Dashboard menu */
 public class Workflow {
     // Professional yet girlish pastel color codes for CLI output
@@ -36,6 +38,7 @@ public class Workflow {
 
     /** Admin Dashboard menu loop handling all features */
     public void adminDashboard(BufferedReader console) throws Exception {
+        Admin currentAdmin = dp.admins[dp.currentAdminIndex];
         System.out.print(ANSI_BACKGROUND + ANSI_SOFT_CORAL + ANSI_BOLD + "\n===== Admin Dashboard =====" + ANSI_RESET + "\n");
         while (true) {
             // Display menu options with pastel theme
@@ -55,10 +58,13 @@ public class Workflow {
             System.out.print("13. " + ANSI_SOFT_CORAL + "Reorder Previous Order" + ANSI_RESET + "\n");
             System.out.print("14. " + ANSI_MUTED_PEACH + "Retry Failed Order" + ANSI_RESET + "\n");
             System.out.print("15. " + ANSI_PASTEL_MINT + "Clear Logs" + ANSI_RESET + "\n");
-            System.out.print("16. " + ANSI_DUSTY_ROSE + "Change Admin Password" + ANSI_RESET + "\n");
-            System.out.print("17. " + ANSI_SOFT_CORAL + "Generate Report" + ANSI_RESET + "\n");
-            System.out.print("18. " + ANSI_PASTEL_MINT + "Simulation Mode" + ANSI_RESET + "\n");
-            System.out.print("19. " + ANSI_MUTED_PEACH + "Load Test Data" + ANSI_RESET + "\n");
+            if (currentAdmin.hasPermission(Role.ADMIN)) {
+            System.out.print("16. " + ANSI_SOFT_CORAL + "Add New Admin" + ANSI_RESET + "\n");
+        }           
+             System.out.print("17. " + ANSI_DUSTY_ROSE + "Change Admin Password" + ANSI_RESET + "\n");
+            System.out.print("18. " + ANSI_SOFT_CORAL + "Generate Report" + ANSI_RESET + "\n");
+            System.out.print("19. " + ANSI_PASTEL_MINT + "Simulation Mode" + ANSI_RESET + "\n");
+            System.out.print("20. " + ANSI_MUTED_PEACH + "Load Test Data" + ANSI_RESET + "\n");
             System.out.print("0. " + ANSI_DUSTY_ROSE + "Exit" + ANSI_RESET + "\n");
 
             System.out.print("\nPlease select an option: ");
@@ -101,10 +107,17 @@ public class Workflow {
                 case "13": handleReorder(console); break;
                 case "14": retryCancelledOrder(console); break;
                 case "15": clearLogs(console); break;
-                case "16": changeAdminPassword(console); break;
-                case "17": generateReport(); break;
-                case "18": runSimulation(console); break;
-                case "19":
+                case "16":
+                if (currentAdmin.hasPermission(Role.ADMIN)) {
+                    addNewAdmin(console);  // Allow only ADMIN to add a new admin
+                } else {
+                    System.out.println("Access denied. Only Admins can add new Admins.");
+                }
+                break;
+                case "17": changeAdminPassword(console); break;
+                case "18": generateReport(); break;
+                case "19": runSimulation(console); break;
+                case "20":
                     System.out.print("Enter test data filename (e.g. testdata.txt): ");
                     String file = console.readLine();
                     if (file == null) file = "";
@@ -128,6 +141,39 @@ public class Workflow {
             System.out.print("\n--------------------------------\n");
         }
     }
+private void addNewAdmin(BufferedReader console) throws Exception {
+    // Only allow current admin to add new admin if they have the ADMIN role
+    Admin currentAdmin = dp.admins[dp.currentAdminIndex];
+    if (currentAdmin == null || !currentAdmin.hasPermission(Role.ADMIN)) {
+        System.out.println("Permission denied. Only admins can add new admins.");
+        return;
+    }
+
+    // Proceed with adding the new admin
+    System.out.print("Enter new admin username: ");
+    String username = console.readLine().trim();
+
+    System.out.print("Enter new admin password: ");
+    String password = console.readLine().trim();
+
+    System.out.print("Enter role (ADMIN, MANAGER, SUPPORT): ");
+    String roleStr = console.readLine().trim().toUpperCase();
+    Role role = Role.valueOf(roleStr);
+
+    // Hash the password before saving
+    String hashedPassword = Admin.hashPassword(password);
+
+    // Create new admin object
+    Admin newAdmin = new Admin(username, hashedPassword, role);
+
+    // Add new admin to the list
+    dp.addAdmin(newAdmin);
+
+    // Save the updated admin list to file
+    dp.saveAll();
+
+    System.out.println("New admin added successfully.");
+}
 
 private void handleOrderSearch(BufferedReader console) throws Exception {
     System.out.print("Enter Order ID or Status to search (or press Enter for advanced filter): ");

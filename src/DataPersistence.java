@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileWriter;    
+
 
 /** DataPersistence.java – Handles loading and saving of data from text files */
 public class DataPersistence {
@@ -106,37 +107,58 @@ public class DataPersistence {
         }
     }
 
- private void loadAdmins() throws Exception {
+private void loadAdmins() throws Exception {
+    adminCount = 0;
     BufferedReader br = null;
+
     try {
-        br = new BufferedReader(new FileReader(path("admins.txt"))); // ✅ Fixed path
+        br = new BufferedReader(new FileReader(path("admins.txt")));
         String line;
-        adminCount = 0;
+
         while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.length() == 0) continue;
+
+            // username|passHash|role
             String[] parts = line.split("\\|");
-            if (parts.length == 2) {
-                String username = parts[0].trim();
-                String passHash = parts[1].trim();
-                admins[adminCount++] = new Admin(username, passHash);
+            if (parts.length < 3) continue;
+
+            String username = parts[0].trim();
+            String passHash = parts[1].trim();
+
+            // ✅ use YOUR enum Role (NOT javax.management.relation.Role)
+            Role role;
+            try {
+                role = Role.valueOf(parts[2].trim().toUpperCase());
+            } catch (Exception ex) {
+                System.out.println("Invalid role for user " + username + ". Using ADMIN by default.");
+                role = Role.ADMIN; // fallback instead of skipping
             }
+
+            Admin a = new Admin(username, passHash, role);
+            admins[adminCount++] = a;
         }
     } catch (Exception e) {
-        // If admins file not found, create default admin later
+        // It's okay if file doesn't exist yet.
     } finally {
         if (br != null) br.close();
     }
 
-    // ✅ Add this debug print AFTER loading is complete
+    // Debug print AFTER loading
     for (int i = 0; i < adminCount; i++) {
-        System.out.print("Loaded admin: " + admins[i].username + "\n");
+        if (admins[i] != null) {
+            System.out.print("Loaded admin: " + admins[i].username + " (" + admins[i].role + ")\n");
+        }
     }
 
+    // Default admin if none found
     if (adminCount == 0) {
         String defaultUser = "admin";
         String defaultPassHash = Admin.hashPassword("admin123");
-        admins[adminCount++] = new Admin(defaultUser, defaultPassHash);
+        admins[adminCount++] = new Admin(defaultUser, defaultPassHash, Role.ADMIN);
     }
 }
+
 
 
     /** Save all data back to text files */
@@ -156,6 +178,13 @@ public class DataPersistence {
         }
         fw.close();
     }
+public void addAdmin(Admin newAdmin) {
+    if (adminCount < admins.length) {
+        admins[adminCount++] = newAdmin;  // Add new admin to the list
+    } else {
+        System.out.println("Unable to add new admin. Admin list is full.");
+    }
+}
 
    public void saveOrders() throws Exception {
     // Open the file for writing (overwrite the file)
@@ -203,7 +232,7 @@ public class DataPersistence {
         for (int i = 0; i < adminCount; i++) {
             Admin a = admins[i];
             if (a == null) continue;
-            fw.write(a.username + "|" + a.passHash + "\n");
+            fw.write(a.username + "|" + a.passHash +"|"+a.role.name()+ "\n");
         }
         fw.close();
     }
@@ -229,6 +258,10 @@ public class DataPersistence {
         }
         return neg ? -value : value;
     }
+
+
+
+
 
     /** Determine nextOrderNumber by finding the max numeric part of loaded order IDs */
     private void computeNextOrderNumber() {
