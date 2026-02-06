@@ -55,7 +55,7 @@ public class Workflow {
 
     private void printTitle(String text) {
     printLine();
-    System.out.println(PINK + BOLD + "🌸 " + text + " 🌸" + RESET);
+    System.out.println(PINK + BOLD + text + RESET);
     printLine();
     }
     private void printDashboardBox(Admin admin) {
@@ -66,7 +66,7 @@ public class Workflow {
     System.out.println(SOFTGRAY + top + RESET);
 
     // Centered Title line
-    String title = "🌸 ADMIN DASHBOARD 🌸";
+    String title = "ADMIN DASHBOARD";
     System.out.println(SOFTGRAY + "║" + RESET
             + PINK + BOLD + centerText(title, 38) + RESET
             + SOFTGRAY + "║" + RESET);
@@ -119,7 +119,7 @@ private String centerText(String text, int width) {
         System.out.print("\n" + LAVENDER + BOLD + "Menu:" + RESET + "\n");
 
         // ===== ORDER MANAGEMENT =====
-        System.out.print(PINK + BOLD + "🌷 ORDER MANAGEMENT" + RESET + "\n");
+        System.out.print(PINK + BOLD + "ORDER MANAGEMENT" + RESET + "\n");
         System.out.print(LAVENDER + " 1." + RESET + " " + MINT + "Accept New Order" + RESET + "\n");
         System.out.print(LAVENDER + " 2." + RESET + " " + MINT + "Update Order Status" + RESET + "\n");
         System.out.print(LAVENDER + " 3." + RESET + " " + MINT + "View Order Logs" + RESET + "\n");
@@ -127,7 +127,7 @@ private String centerText(String text, int width) {
         System.out.print(LAVENDER + " 5." + RESET + " " + MINT + "Generate Receipt" + RESET + "\n");
 
         // ===== PRODUCT & STOCK =====
-        System.out.print("\n" + PINK + BOLD + "🌷 PRODUCT & STOCK" + RESET + "\n");
+        System.out.print("\n" + PINK + BOLD + "PRODUCT & STOCK" + RESET + "\n");
         System.out.print(LAVENDER + " 6." + RESET + " " + MINT + "Advanced Product Filter" + RESET + "\n");
 
         // Admin/Manager
@@ -145,14 +145,14 @@ private String centerText(String text, int width) {
         }
 
         // ===== OPERATIONS =====
-        System.out.print("\n" + PINK + BOLD + "🌷 OPERATIONS" + RESET + "\n");
+        System.out.print("\n" + PINK + BOLD + "OPERATIONS" + RESET + "\n");
         System.out.print(LAVENDER + "13." + RESET + " " + MINT + "Reorder Previous Order" + RESET + "\n");
         System.out.print(LAVENDER + "14." + RESET + " " + MINT + "Retry Failed Order" + RESET + "\n");
         System.out.print(LAVENDER + "19." + RESET + " " + MINT + "Simulation Mode" + RESET + "\n");
         System.out.print(LAVENDER + "20." + RESET + " " + MINT + "Load Test Data" + RESET + "\n");
 
         // ===== ADMIN ONLY =====
-        System.out.print("\n" + PINK + BOLD + "🌷 SYSTEM (ADMIN ONLY)" + RESET + "\n");
+        System.out.print("\n" + PINK + BOLD + "SYSTEM (ADMIN ONLY)" + RESET + "\n");
         if (currentAdmin.role == Role.ADMIN) {
             System.out.print(LAVENDER + "11." + RESET + " " + MINT + "Bulk Import Orders" + RESET + "\n");
             System.out.print(LAVENDER + "12." + RESET + " " + MINT + "Archive Delivered Orders" + RESET + "\n");
@@ -172,14 +172,14 @@ private String centerText(String text, int width) {
         // ===== EXIT =====
         System.out.print("\n" + LAVENDER + " 0." + RESET + " " + PEACH + "Exit" + RESET + "\n");
         printLine();
-        System.out.print(PINK + BOLD + "✨ Please select an option → " + RESET);
+        System.out.print(PINK + BOLD + "Please select an option → " + RESET);
 
         String choice = console.readLine();
         if (choice == null) choice = "";
         choice = choice.trim();
         System.out.print("\n");
         if (!choice.equals("")) {
-        System.out.println(MINT + "✔ You selected option: " + choice + RESET);
+        System.out.println(MINT + "You selected option: " + choice + RESET);
         printLine();   // optional but looks professional
         }
         switch (choice) {
@@ -188,15 +188,13 @@ private String centerText(String text, int width) {
 
             case "3":
                 System.out.println(PINK + BOLD + "==== Available Orders (Sorted by Date) ====" + RESET);
-
+                printLine();
                 Order[] sortedOrders = Arrays.copyOf(dp.orders, dp.orderCount);
                 Arrays.sort(sortedOrders, Comparator.comparing(o -> o.date));
 
                 for (Order order : sortedOrders) {
                     if (order != null) {
-                        System.out.println(SOFTGRAY + order.orderId + RESET
-                                + SOFTGRAY + " | Date: " + RESET + MINT + order.date + RESET
-                                + SOFTGRAY + " | Status: " + RESET + LAVENDER + order.status + RESET);
+                        System.out.println(SOFTGRAY + order.orderId + RESET + SOFTGRAY + " | Date: " + RESET + MINT + order.date + RESET + SOFTGRAY + " | Status: " + RESET + LAVENDER + order.status + RESET);
                     }
                 }
 
@@ -216,7 +214,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     handleProductManagement(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin/Manager only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -224,7 +222,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     showLowStockAlerts();
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin/Manager only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -232,7 +230,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     handleRestock(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin/Manager only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -240,7 +238,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     exportStockReport();
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin/Manager only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -248,7 +246,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     importOrdersFromFile(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -256,7 +254,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     archiveDeliveredOrders(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -267,7 +265,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     clearLogs(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -275,7 +273,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     addNewAdmin(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -283,7 +281,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     changeAdminPassword(console);
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -291,7 +289,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     generateReport();
                 } else {
-                    System.out.println(PEACH + "🔒 Restricted: Admin only." + RESET);
+                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -305,7 +303,7 @@ private String centerText(String text, int width) {
                 if (!file.equals("")) {
                     dp.loadTestDataFromFile(file);
                     dp.saveAll();
-                    System.out.print(MINT + "✔ Loaded test data successfully\n" + RESET);
+                    System.out.print(MINT + "Loaded test data successfully\n" + RESET);
                     System.out.print(SOFTGRAY + "-> " + dp.productCount + " products loaded.\n" + RESET);
                     System.out.print(SOFTGRAY + "-> " + dp.orderCount + " orders loaded.\n" + RESET);
                     System.out.print(SOFTGRAY + "-> " + dp.adminCount + " admins loaded.\n" + RESET);
@@ -313,12 +311,12 @@ private String centerText(String text, int width) {
                 break;
 
             case "0":
-                System.out.print(PEACH + "🌸 Exiting Admin Dashboard... 🌸" + RESET + "\n");
-                System.out.print(PEACH + "🌸 Thank you for using E-commerce Order Fulfillment Automation System 🌸" + RESET + "\n");
+                System.out.print(PEACH + "Exiting Admin Dashboard..." + RESET + "\n");
+                System.out.print(PEACH + "Thank you for using E-commerce Order Fulfillment Automation System" + RESET + "\n");
                 return;
 
             default:
-                System.out.print(PEACH + "⚠ Invalid option. Please try again." + RESET + "\n");
+                System.out.print(PEACH + "Invalid option. Please try again." + RESET + "\n");
                 break;
         }
 
