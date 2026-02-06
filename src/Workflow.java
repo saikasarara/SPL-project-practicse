@@ -49,20 +49,27 @@ public class Workflow {
             System.out.print("4. " + ANSI_LAVENDER_GRAY + "Search/Filter Orders" + ANSI_RESET + "\n");
             System.out.print("5. " + ANSI_SOFT_CORAL + "Generate Receipt" + ANSI_RESET + "\n");
             System.out.print("6. " + ANSI_MUTED_PEACH + "Advanced Product Filter" + ANSI_RESET + "\n");
+          if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {  
             System.out.print("7. " + ANSI_PASTEL_MINT + "Manage Products (Add/Edit/Delete)" + ANSI_RESET + "\n");
             System.out.print("8. " + ANSI_DUSTY_ROSE + "Low Stock Alerts" + ANSI_RESET + "\n");
             System.out.print("9. " + ANSI_SOFT_CORAL + "Restock Product" + ANSI_RESET + "\n");
             System.out.print("10. " + ANSI_MUTED_PEACH + "Export Stock Report" + ANSI_RESET + "\n");
+          }
+            
+          if (currentAdmin.role == Role.ADMIN) {
             System.out.print("11. " + ANSI_LAVENDER_GRAY + "Bulk Import Orders" + ANSI_RESET + "\n");
             System.out.print("12. " + ANSI_PASTEL_MINT + "Archive Delivered Orders" + ANSI_RESET + "\n");
+          }
             System.out.print("13. " + ANSI_SOFT_CORAL + "Reorder Previous Order" + ANSI_RESET + "\n");
             System.out.print("14. " + ANSI_MUTED_PEACH + "Retry Failed Order" + ANSI_RESET + "\n");
+           if (currentAdmin.role == Role.ADMIN) { 
             System.out.print("15. " + ANSI_PASTEL_MINT + "Clear Logs" + ANSI_RESET + "\n");
             if (currentAdmin.hasPermission(Role.ADMIN)) {
             System.out.print("16. " + ANSI_SOFT_CORAL + "Add New Admin" + ANSI_RESET + "\n");
         }           
              System.out.print("17. " + ANSI_DUSTY_ROSE + "Change Admin Password" + ANSI_RESET + "\n");
             System.out.print("18. " + ANSI_SOFT_CORAL + "Generate Report" + ANSI_RESET + "\n");
+        }
             System.out.print("19. " + ANSI_PASTEL_MINT + "Simulation Mode" + ANSI_RESET + "\n");
             System.out.print("20. " + ANSI_MUTED_PEACH + "Load Test Data" + ANSI_RESET + "\n");
             System.out.print("0. " + ANSI_DUSTY_ROSE + "Exit" + ANSI_RESET + "\n");
