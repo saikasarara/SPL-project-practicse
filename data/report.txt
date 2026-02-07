@@ -1,4 +1,4 @@
-Total Orders: 22
+Total Orders: 24
 Completed Orders: 0
 Cancelled Orders: 10
 Total Revenue: BDT 0

@@ -98,58 +98,106 @@ private String normalizeOrderIdForUI(String id) {
         }
     }
 
- private void loadOrders() throws Exception {
+    private String normalizeOrderId(String raw) {
+    if (raw == null) return "";
+    raw = raw.trim().toUpperCase();
+
+    // remove leading 'O' if present
+    if (raw.startsWith("O")) raw = raw.substring(1);
+
+    // keep only digits
+    String digits = "";
+    for (int i = 0; i < raw.length(); i++) {
+        char c = raw.charAt(i);
+        if (c >= '0' && c <= '9') digits += c;
+    }
+
+    int num = toInt(digits);
+    if (num <= 0) return "";
+
+    // pad to 4 digits: 1019 -> 1019, 19 -> 0019
+    String s = "" + num;
+    while (s.length() < 4) s = "0" + s;
+
+    return "O" + s;
+}
+
+
+private void loadOrders() throws Exception {
     orderCount = 0;
     BufferedReader br = null;
+
     try {
         br = new BufferedReader(new FileReader(path("orders.txt")));
         String line;
+
         while ((line = br.readLine()) != null) {
             line = line.trim();
             if (line.length() == 0) continue;
 
-            // ✅ Actual Format in your file:
-            // OrderID|Date|Address|PaymentMode|Status|Total|ItemList|CancelReason|TrackingId (optional)
+            // Format:
+            // OrderID|Date|Address|PaymentMode|Status|Total|ItemList|CancelReason|TrackingId(optional)
             String[] parts = line.split("\\|");
-
             if (parts.length < 5) continue;
 
             Order o = new Order();
-            o.orderId = normalizeOrderIdForUI(parts[0]);
+
+            // ✅ IMPORTANT: normalize to STORAGE format (keep O + 4 digits)
+            o.orderId = normalizeOrderId(parts[0].trim());
+
             o.date = (parts.length > 1 ? parts[1].trim() : "");
             o.address = (parts.length > 2 ? parts[2].trim() : "");
             o.paymentMode = (parts.length > 3 ? parts[3].trim() : "");
             o.status = (parts.length > 4 ? parts[4].trim() : "PENDING");
 
-            // ✅ Total amount (index 5)
-            if (parts.length > 5) {
-                o.totalAmount = toInt(parts[5].trim());
-            }
-
-            // ✅ Items list (index 6)
+            // Items list (index 6)
+            String itemsPart = "";
             if (parts.length > 6) {
-                String itemsPart = parts[6].trim();
+                itemsPart = parts[6].trim();
                 parseItemsIntoOrder(o, itemsPart);
             }
 
-            // ✅ Cancel reason (index 7, optional)
+            // Total amount (index 5)
+            if (parts.length > 5) {
+                o.totalAmount = toInt(parts[5].trim());
+            } else {
+                o.totalAmount = 0;
+            }
+
+            // ✅ FIX: if total is 0 but items exist → recalculate from products
+            if (o.totalAmount <= 0 && o.itemCount > 0) {
+                int total = 0;
+                for (int i = 0; i < o.itemCount; i++) {
+                    Item it = o.items[i];
+                    if (it == null) continue;
+                    Product p = findProductById(it.productId);
+                    if (p != null) {
+                        total += p.price * it.quantity;
+                    }
+                }
+                o.totalAmount = total;
+            }
+
+            // Cancel reason (index 7)
             if (parts.length > 7) {
                 o.cancelReason = parts[7].trim();
             }
 
-            // ✅ Tracking ID (index 8, optional) - if you later add it
+            // Tracking ID (index 8)
             if (parts.length > 8) {
                 o.trackingId = parts[8].trim();
             }
 
             orders[orderCount++] = o;
         }
+
     } catch (Exception e) {
-        // If orders file not found, skip
+        // If orders.txt doesn't exist, it's fine
     } finally {
         if (br != null) br.close();
     }
 }
+
 
 
 private void loadAdmins() throws Exception {
@@ -305,6 +353,21 @@ public void addAdmin(Admin newAdmin) {
     }
 
 
+public int computeOrderTotal(Order o) {
+    if (o == null) return 0;
+
+    int total = 0;
+    for (int i = 0; i < o.itemCount; i++) {
+        Item it = o.items[i];
+        if (it == null) continue;
+
+        Product p = findProductById(it.productId);
+        if (p != null) {
+            total += p.price * it.quantity;
+        }
+    }
+    return total;
+}
 
 
 
