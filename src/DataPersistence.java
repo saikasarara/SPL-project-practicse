@@ -77,46 +77,59 @@ public class DataPersistence {
         }
     }
 
-    private void loadOrders() throws Exception {
-        orderCount = 0;
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(path("orders.txt")));
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                if (line.length() == 0) continue;
-                // Format: OrderID|Date|Address|PaymentMode|Status|ItemList|Total|CancelReason
-                String[] parts = line.split("\\|");
-                if (parts.length < 5) continue;
-                Order o = new Order();
-                o.orderId    = parts[0].trim();
-                o.date       = (parts.length > 1 ? parts[1].trim() : "");
-                o.address    = (parts.length > 2 ? parts[2].trim() : "");
-                o.paymentMode= (parts.length > 3 ? parts[3].trim() : "");
-                o.status     = (parts.length > 4 ? parts[4].trim() : "PENDING");
-                // Parse items list
-                if (parts.length > 5) {
-                    String itemsPart = parts[5].trim();
-                    parseItemsIntoOrder(o, itemsPart);
-                }
-                // Total amount
-                if (parts.length > 6) {
-                    o.totalAmount = toInt(parts[6].trim());
-                }
-                // Cancel reason (if any)
-                if (parts.length > 7) {
-                    o.cancelReason = parts[7].trim();
-                }
-                // Tracking ID will be assigned when order is marked SHIPPED in workflow
-                orders[orderCount++] = o;
+ private void loadOrders() throws Exception {
+    orderCount = 0;
+    BufferedReader br = null;
+    try {
+        br = new BufferedReader(new FileReader(path("orders.txt")));
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.length() == 0) continue;
+
+            // ✅ Actual Format in your file:
+            // OrderID|Date|Address|PaymentMode|Status|Total|ItemList|CancelReason|TrackingId (optional)
+            String[] parts = line.split("\\|");
+
+            if (parts.length < 5) continue;
+
+            Order o = new Order();
+            o.orderId = parts[0].trim();
+            o.date = (parts.length > 1 ? parts[1].trim() : "");
+            o.address = (parts.length > 2 ? parts[2].trim() : "");
+            o.paymentMode = (parts.length > 3 ? parts[3].trim() : "");
+            o.status = (parts.length > 4 ? parts[4].trim() : "PENDING");
+
+            // ✅ Total amount (index 5)
+            if (parts.length > 5) {
+                o.totalAmount = toInt(parts[5].trim());
             }
-        } catch (Exception e) {
-            // If orders file not found, skip (no initial orders)
-        } finally {
-            if (br != null) br.close();
+
+            // ✅ Items list (index 6)
+            if (parts.length > 6) {
+                String itemsPart = parts[6].trim();
+                parseItemsIntoOrder(o, itemsPart);
+            }
+
+            // ✅ Cancel reason (index 7, optional)
+            if (parts.length > 7) {
+                o.cancelReason = parts[7].trim();
+            }
+
+            // ✅ Tracking ID (index 8, optional) - if you later add it
+            if (parts.length > 8) {
+                o.trackingId = parts[8].trim();
+            }
+
+            orders[orderCount++] = o;
         }
+    } catch (Exception e) {
+        // If orders file not found, skip
+    } finally {
+        if (br != null) br.close();
     }
+}
+
 
 private void loadAdmins() throws Exception {
     adminCount = 0;
@@ -307,25 +320,49 @@ public void addAdmin(Admin newAdmin) {
         return newId;
     }
 
-    /** Parse an "ItemList" string (format "ProductIDxQty, ...") into Item objects added to Order */
-    public void parseItemsIntoOrder(Order o, String itemsPart) {
-        if (o == null || itemsPart == null) return;
-        String part = itemsPart.trim();
-        if (part.length() == 0) return;
-        String[] itemTokens = part.split(",");
-        for (int i = 0; i < itemTokens.length; i++) {
-            String token = itemTokens[i].trim();
-            if (token.length() == 0) continue;
-            // Each token format: ProductIDxQuantity (e.g., "M101x2")
+/** Parse an "ItemList" string into Item objects added to Order
+ *  Supported formats:
+ *  - "P01x2,P03x1"
+ *  - "P01:2,P03:1"
+ */
+public void parseItemsIntoOrder(Order o, String itemsPart) {
+    if (o == null || itemsPart == null) return;
+
+    String part = itemsPart.trim();
+    if (part.length() == 0) return;
+
+    String[] itemTokens = part.split(",");
+    for (int i = 0; i < itemTokens.length; i++) {
+        String token = itemTokens[i].trim();
+        if (token.length() == 0) continue;
+
+        String pid = "";
+        int qty = 0;
+
+        // ✅ Support "PIDxQTY"
+        if (token.contains("x")) {
             String[] kv = token.split("x");
             if (kv.length == 2) {
-                String pid = kv[0].trim();
-                int qty = toInt(kv[1].trim());
-                Item item = new Item(pid, qty);
-                o.addItem(item);  // addItem will ignore if qty <= 0 or capacity exceeded
+                pid = kv[0].trim();
+                qty = toInt(kv[1].trim());
             }
         }
+        // ✅ Support "PID:QTY"
+        else if (token.contains(":")) {
+            String[] kv = token.split(":");
+            if (kv.length == 2) {
+                pid = kv[0].trim();
+                qty = toInt(kv[1].trim());
+            }
+        }
+
+        if (pid.length() > 0 && qty > 0) {
+            Item item = new Item(pid, qty);
+            o.addItem(item);
+        }
     }
+}
+
 
     /** Find a Product by its ID (case-sensitive match). Returns null if not found. */
     public Product findProductById(String productId) {
