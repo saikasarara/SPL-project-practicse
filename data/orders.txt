@@ -1,6 +1,6 @@
 O1001|2026-02-01|Dhaka|COD|DELIVERED|0||# Delivered order (COD)
 O1002|2026-02-02|Chittagong|COD|CANCELLED|0||Inventory Shortage   # Cancelled due to stock shortage
-O1003|2026-02-03|Sylhet|MockCard|PENDING|0||# Pending order (awaiting processing, MockCard)
+O1003|2026-02-03|Sylhet|MockCard|OUT_FOR_DELIVERY|0||# Pending order (awaiting processing, MockCard)
 O1004|2026-02-03|Dhaka|MockCard|CANCELLED|0||Payment Declined  # Cancelled due to payment failure
 O1006|2026-02-04|Dhaka|COD|DELIVERED|0|
 O1007|2026-02-04|Dhaka|COD|DELIVERED|0|
@@ -13,4 +13,4 @@ O1013|2026-02-05|SimulatedAddress|COD|CANCELLED|0||Inventory Shortage: M101
 O1014|2026-02-05|SimulatedAddress|COD|DELIVERED|0|
 O1015|2026-02-05|Dhaka|COD|CANCELLED|0||Inventory Shortage: M101
 O1016|2026-02-05|Dhaka|COD|DELIVERED|0|
-O1017|2026-02-07|Dhaka|COD|CANCELLED|0|M101x1,M102x1|Inventory Shortage: M101
+O1017|2026-02-07|Dhaka|COD|CANCELLED|10111021||Inventory Shortage: M101

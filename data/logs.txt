@@ -57,3 +57,8 @@ Order O1017 - Reordered from O1010
 Order O1017 - Order created via admin interface (pending)
 Order O1017 - Order cancelled -Inventory Shortage: M101
 Order O1007 - Status changed to DELIVERED
+Order O1003 - Inventory OK – stock reserved
+Order O1003 - PAYMENT OK (MockCard approved)
+Order O1003 - Status changed to PACKED
+Order O1003 - Status changed to SHIPPED
+Order O1003 - Status changed to OUT_FOR_DELIVERY

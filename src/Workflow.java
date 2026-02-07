@@ -386,6 +386,7 @@ private void addNewAdmin(BufferedReader console) throws Exception {
 }
 
 private void handleOrderSearch(BufferedReader console) throws Exception {
+    showOrdersPreview();
     System.out.print(SOFTGRAY+"Enter Order ID or Status to search (or press Enter for advanced filter): "+RESET);
     printLine();
     String query = console.readLine();
@@ -1708,7 +1709,8 @@ private void showOrdersForStatusUpdate() {
         // Color status
         String stColor = SOFTGRAY;
         if (st.equals("PENDING")) stColor = ANSI_MUTED_PEACH;            // warning
-        else if (st.equals("DELIVERED")) stColor = MINT;      // success
+        else if (st.equals("OUT_FOR_DELIVERY")) stColor = ANSI_SOFT_CORAL;        // 🚚 on the way (attention)
+        else if (st.equals("DELIVERED")) stColor = MINT; // success
         else if (st.equals("CANCELLED")) stColor = ROSE;     // warning
         else stColor = SOFTGRAY;
 
@@ -1725,7 +1727,47 @@ private void showOrdersForStatusUpdate() {
 
     printLine();
 }
+private void showOrdersPreview() {
+    System.out.println(PINK + BOLD + "\nOrders List (Preview)" + RESET);
+    printLine();
 
+    if (dp.orderCount == 0) {
+        System.out.println(ROSE + "No orders available." + RESET);
+        printLine();
+        return;
+    }
+
+    // Header
+    System.out.printf(LAVENDER + "%-10s %-12s %-18s %-10s %-10s" + RESET + "%n",
+            "OrderID", "Date", "Status", "Payment", "Total");
+    System.out.println(SOFTGRAY + "--------------------------------------------------------------" + RESET);
+
+    // Rows
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null) continue;
+
+        String st = (o.status == null) ? "" : o.status.trim();
+
+        // Color by status
+        String stColor = SOFTGRAY;
+        if (st.equals("PENDING")) stColor = ANSI_MUTED_PEACH;
+        else if (st.equals("OUT_FOR_DELIVERY")) stColor = ANSI_SOFT_CORAL;        // 🚚 on the way (attention)
+        else if (st.equals("DELIVERED")) stColor = MINT;
+        else if (st.equals("CANCELLED")) stColor = ROSE;
+        else stColor = SOFTGRAY;
+
+        System.out.printf("%-10s %-12s %s%-18s%s %-10s %-10d%n",
+                o.orderId,
+                o.date,
+                stColor, st, RESET,
+                (o.paymentMode == null ? "" : o.paymentMode),
+                o.totalAmount
+        );
+    }
+
+    printLine();
+}
 
    }
 
