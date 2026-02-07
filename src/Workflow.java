@@ -164,7 +164,7 @@ private int countLowStock(int threshold) {
         printRoleSummary(currentAdmin);
         printLine();
         // ===== MENU HEADER =====
-        System.out.print("\n" + LAVENDER + BOLD + "Menu:" + RESET + "\n");
+        System.out.print("\n" + LAVENDER + BOLD + "____________________Menu:____________________" + RESET + "\n");
 
         // ===== ORDER MANAGEMENT =====
         System.out.print(PINK + BOLD + "ORDER MANAGEMENT" + RESET + "\n");
@@ -678,6 +678,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
     /** Feature 5 & 8: Reorder a previous order (copy its items into a new order and process it) */
     private void handleReorder(BufferedReader console) throws Exception {
+        showReorderPreview();
         System.out.print(SOFTGRAY+"Enter Order ID to reorder: "+RESET);
         String oldId = console.readLine();
         if (oldId == null) oldId = "";
@@ -2008,6 +2009,46 @@ private String trimTo(String s, int max) {
     if (s.length() <= max) return s;
     return s.substring(0, max - 3) + "...";
 }
+private void showReorderPreview() {
+    System.out.println(PINK + BOLD + "\nPrevious Orders (For Reorder)" + RESET);
+    printLine();
 
+    if (dp.orderCount == 0) {
+        System.out.println(ROSE + "No orders found." + RESET);
+        printLine();
+        return;
+    }
+
+    System.out.printf(LAVENDER + "%-10s %-12s %-18s %-10s %-10s" + RESET + "%n",
+            "OrderID", "Date", "Status", "Payment", "Total");
+    System.out.println(SOFTGRAY + "--------------------------------------------------------------" + RESET);
+
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null) continue;
+
+        // Skip cancelled orders (optional, but useful for reorder)
+        if (o.status != null && o.status.equalsIgnoreCase("CANCELLED")) continue;
+
+        String st = (o.status == null) ? "" : o.status.trim().toUpperCase();
+
+        String stColor = SOFTGRAY;
+        if (st.equals("PENDING")) stColor = MINT;
+        else if (st.equals("PACKED")) stColor = MINT;
+        else if (st.equals("SHIPPED")) stColor = MINT;
+        else if (st.equals("OUT_FOR_DELIVERY")) stColor = MINT;
+        else if (st.equals("DELIVERED")) stColor = MINT;
+
+        System.out.printf("%-10s %-12s %s%-18s%s %-10s %-10d%n",
+                o.orderId,
+                o.date,
+                stColor, st, RESET,
+                (o.paymentMode == null ? "" : o.paymentMode),
+                o.totalAmount
+        );
+    }
+
+    printLine();
+}
    }
 

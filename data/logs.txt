@@ -74,3 +74,9 @@ Order O1019 - Status changed to PACKED
 Order ADMIN - Restocked M101 (+34)
 Order ADMIN - Restocked M104 (+60)
 Order ADMIN - Added product P106
+Order ADMIN - Added product M105
+Order ADMIN - Restocked M102 (+20)
+Order 01020 - Inventory OK – stock reserved
+Order 01020 - PAYMENT OK (Cash on Delivery)
+Order 01020 - Status changed to PACKED
+Order 01020 - Reordered from 01011

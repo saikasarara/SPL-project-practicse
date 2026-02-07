@@ -1,5 +1,5 @@
 M101|Smartphone|Samsung|Galaxy A14 (4/64)|19999|34
-M102|Smartphone|Xiaomi|Redmi 12 (8/128)|18999|1
+M102|Smartphone|Xiaomi|Redmi 12 (8/128)|18999|21
 M103|Smartphone|Realme|C55 (8/128)|19500|1
 M104|Smartphone|Nokia|G21 (6/128)|17500|60
 L201|Laptop|HP|Pavilion 15 (i5)|72000|6
@@ -19,3 +19,4 @@ P502|Power Bank|Anker|PowerCore 20K|4999|12
 P503|Power Bank|Baseus|Bipow 20W|3499|18
 P504|Power Bank|Remax|RPP-20|2999|15
 P106|Phone|Samsung|P2|300000000|90
+M105|Smartphone|Tecno|Camon 30|25000|10
