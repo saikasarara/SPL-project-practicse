@@ -490,5 +490,50 @@ public String currentDateTimeString() {
     java.time.LocalDateTime dt = java.time.LocalDateTime.now();
     return dt.toString(); // 2026-02-07T12:30:00
 }
+
+// Auto-generate Product ID based on category using your existing pattern (M/L/H/A/P)
+public String generateProductIdByCategory(String category) {
+    // Map category -> prefix
+    char prefix = 'X';
+    if (category != null) {
+        String c = category.trim().toUpperCase();
+        if (c.equals("SMARTPHONE")) prefix = 'M';
+        else if (c.equals("LAPTOP")) prefix = 'L';
+        else if (c.equals("HOME APPLIANCE")) prefix = 'H';
+        else if (c.equals("ACCESSORIES")) prefix = 'A';
+        else if (c.equals("POWER BANK")) prefix = 'P';
+    }
+
+    // If unknown category, default prefix
+    if (prefix == 'X') prefix = 'G'; // General
+
+    // Find current max number for that prefix
+    int max = 0;
+    for (int i = 0; i < productCount; i++) {
+        Product p = products[i];
+        if (p == null || p.productId == null) continue;
+
+        String pid = p.productId.trim().toUpperCase();
+        if (pid.length() < 2) continue;
+        if (pid.charAt(0) != prefix) continue;
+
+        // extract digits
+        String digits = "";
+        for (int k = 0; k < pid.length(); k++) {
+            char ch = pid.charAt(k);
+            if (ch >= '0' && ch <= '9') digits += ch;
+        }
+
+        int n = toInt(digits);
+        if (n > max) max = n;
+    }
+
+    // Next number
+    int next = max + 1;
+
+    // keep your style: M101, L201, H301, A401, P501
+    return "" + prefix + next;
+}
+
 }
 

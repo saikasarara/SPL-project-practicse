@@ -71,3 +71,6 @@ Order O1019 - Order created via admin interface (pending)
 Order O1019 - Inventory OK – stock reserved
 Order O1019 - PAYMENT OK (Cash on Delivery)
 Order O1019 - Status changed to PACKED
+Order ADMIN - Restocked M101 (+34)
+Order ADMIN - Restocked M104 (+60)
+Order ADMIN - Added product P106
