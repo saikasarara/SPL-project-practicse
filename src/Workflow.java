@@ -1801,6 +1801,22 @@ private void showOrdersForStatusUpdate() {
 
     printLine();
 }
+private int computeOrderTotal(Order o) {
+    if (o == null) return 0;
+    int total = 0;
+
+    for (int i = 0; i < o.itemCount; i++) {
+        Item it = o.items[i];
+        if (it == null) continue;
+
+        Product p = dp.findProductById(it.productId);
+        if (p != null) {
+            total += p.price * it.quantity;
+        }
+    }
+    return total;
+}
+
 private void showOrdersPreview() {
     System.out.println(PINK + BOLD + "\nOrders List (Preview)" + RESET);
     printLine();
@@ -1825,23 +1841,32 @@ private void showOrdersPreview() {
 
         // Color by status
         String stColor = SOFTGRAY;
-        if (st.equals("PENDING")) stColor = ANSI_MUTED_PEACH;
-        else if (st.equals("OUT_FOR_DELIVERY")) stColor = ANSI_SOFT_CORAL;        // 🚚 on the way (attention)
+        if (st.equals("PENDING")) stColor = MINT;
+        else if (st.equals("PACKED")) stColor = MINT;
+        else if (st.equals("SHIPPED")) stColor = MINT;
+        else if (st.equals("OUT_FOR_DELIVERY")) stColor = ANSI_SOFT_CORAL;
         else if (st.equals("DELIVERED")) stColor = MINT;
         else if (st.equals("CANCELLED")) stColor = ROSE;
         else stColor = SOFTGRAY;
+
+        // ✅ FIX TOTAL: if stored total is 0, compute from items
+        int total = o.totalAmount;
+        if (total <= 0) {
+            total = computeOrderTotal(o);
+        }
 
         System.out.printf("%-10s %-12s %s%-18s%s %-10s %-10d%n",
                 o.orderId,
                 o.date,
                 stColor, st, RESET,
                 (o.paymentMode == null ? "" : o.paymentMode),
-                o.totalAmount
+                total
         );
     }
 
     printLine();
 }
+
 
 private void showProductsPreview() {
     System.out.print(PINK + BOLD + "\nProduct List (Preview)\n" + RESET);
