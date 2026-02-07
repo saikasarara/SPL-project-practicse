@@ -12,7 +12,7 @@ H303|Home Appliance|Panasonic|Table Fan|5500|10
 H304|Home Appliance|Vision|Rechargeable Fan|7800|6
 A401|Accessories|Sony|WH-1000XM4|32000|5
 A402|Accessories|JBL|Tune 510BT|7999|18
-A403|Accessories|Anker|Soundcore Q10|6999|20
+A403|Accessories|Anker|Soundcore Q10|6999|14
 A404|Accessories|Skullcandy|Crusher Evo|29000|4
 P501|Power Bank|Xiaomi|Mi Power Bank 3|2399|30
 P502|Power Bank|Anker|PowerCore 20K|4999|12
