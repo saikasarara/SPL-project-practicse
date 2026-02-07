@@ -50,3 +50,7 @@ Order O1017 - Inventory OK – stock reserved
 Order O1017 - PAYMENT OK (Cash on Delivery)
 Order O1017 - Status changed to PACKED
 Order ADMIN - Restocked M101 (+23)
+Order O1017 - Inventory OK – stock reserved
+Order O1017 - PAYMENT OK (Cash on Delivery)
+Order O1017 - Status changed to PACKED
+Order O1017 - Reordered from O1010

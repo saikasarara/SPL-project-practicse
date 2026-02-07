@@ -9,27 +9,19 @@ import java.util.Comparator;
 
 /** Workflow.java – Orchestrates order processing and provides the Admin Dashboard menu */
 public class Workflow {
-    // Professional yet girlish pastel color codes for CLI output
-    public static final String ANSI_SOFT_CORAL   = "\u001B[38;5;215m"; // Soft coral for Pending
-    public static final String ANSI_LAVENDER_GRAY = "\u001B[38;5;183m"; // Lavender gray for Completed
-    public static final String ANSI_MUTED_PEACH  = "\u001B[38;5;215m"; // Muted peach for Shipped
-    public static final String ANSI_PASTEL_MINT  = "\u001B[38;5;156m"; // Pastel mint for Accepted
-    public static final String ANSI_DUSTY_ROSE   = "\u001B[38;5;172m"; // Dusty rose for Cancelled
-    public static final String ANSI_BACKGROUND   = "\u001B[48;5;231m"; // Soft pastel background
-    public static final String ANSI_UNDERLINE    = "\u001B[4m";  // Underlined text
+    public static final String ANSI_SOFT_CORAL = "\u001B[38;5;209m";
+    public static final String ANSI_MUTED_PEACH = "\u001B[38;5;216m";
     public static final String ANSI_Yellow ="\u001B[38;5;220m";
     // ===== Pastel Theme (Girlish + Professional) =====
     public static final String RESET = "\u001B[0m";
     public static final String BOLD  = "\u001B[1m";
-
     // Soft pastel colors
     public static final String PINK      = "\u001B[38;5;211m"; // header / highlight
     public static final String LAVENDER  = "\u001B[38;5;183m"; // menu numbers
     public static final String MINT      = "\u001B[38;5;156m"; // success/allowed
-   //  public static final String PEACH     = "\u001B[38;5;216m"; // warnings/restricted
+    //public static final String PEACH     = "\u001B[38;5;216m"; // warnings/restricted
     public static final String ROSE      = "\u001B[38;5;174m"; // exit/error
     public static final String SOFTGRAY  = "\u001B[38;5;250m"; // normal text
-
     // Background (optional)
     public static final String BG_WHITE  = "\u001B[48;5;231m";
 
@@ -94,6 +86,39 @@ private String centerText(String text, int width) {
     for (int i = 0; i < right; i++) sb.append(' ');
     return sb.toString();
 }
+private void printRoleSummary(Admin admin) {
+    printTitle("Quick Summary");
+    int pending = 0, delivered = 0, cancelled = 0;
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null) continue;
+        if ("PENDING".equals(o.status)) pending++;
+        else if ("DELIVERED".equals(o.status)) delivered++;
+        else if ("CANCELLED".equals(o.status)) cancelled++;
+    }
+
+    if (admin.role == Role.ADMIN) {
+        System.out.print(SOFTGRAY + "• Total Orders: " + RESET + MINT + dp.orderCount + RESET + "\n");
+        System.out.print(SOFTGRAY + "• Pending: " + RESET + MINT + pending + RESET + "\n");
+        System.out.print(SOFTGRAY + "• Delivered: " + RESET + MINT + delivered + RESET + "\n");
+        System.out.print(SOFTGRAY + "• Cancelled: " + RESET + ROSE + cancelled + RESET + "\n");
+    } else if (admin.role == Role.MANAGER) {
+        System.out.print(SOFTGRAY + "• Pending Orders: " + RESET + MINT + pending + RESET + "\n");
+        System.out.print(SOFTGRAY + "• Low Stock Items: " + RESET + ANSI_Yellow+ countLowStock(5) + RESET + "\n");
+    } else {
+        System.out.print(SOFTGRAY + "• Pending Orders: " + RESET + MINT + pending + RESET + "\n");
+        System.out.print(SOFTGRAY + "• Cancelled Orders: " + RESET + ROSE + cancelled + RESET + "\n");
+    }
+}
+
+private int countLowStock(int threshold) {
+    int c = 0;
+    for (int i = 0; i < dp.productCount; i++) {
+        Product p = dp.products[i];
+        if (p != null && p.stock <= threshold) c++;
+    }
+    return c;
+}
 
 
 
@@ -114,7 +139,8 @@ private String centerText(String text, int width) {
 
         // refresh current admin each loop (safe)
         currentAdmin = dp.admins[dp.currentAdminIndex];
-
+        printRoleSummary(currentAdmin);
+        printLine();
         // ===== MENU HEADER =====
         System.out.print("\n" + LAVENDER + BOLD + "Menu:" + RESET + "\n");
 
@@ -150,7 +176,9 @@ private String centerText(String text, int width) {
         System.out.print(LAVENDER + "14." + RESET + " " + MINT + "Retry Failed Order" + RESET + "\n");
         System.out.print(LAVENDER + "19." + RESET + " " + MINT + "Simulation Mode" + RESET + "\n");
         System.out.print(LAVENDER + "20." + RESET + " " + MINT + "Load Test Data" + RESET + "\n");
-
+        System.out.print(LAVENDER + "21." + RESET + " " + MINT + "System Health Check" + RESET + "\n");
+        System.out.print(LAVENDER + "22." + RESET + " " + MINT + "Show Order Timeline" + RESET + "\n");
+        System.out.print(LAVENDER + "23." + RESET + " " + MINT + "Auto Cancel Stale Orders" + RESET + "\n");
         // ===== ADMIN ONLY =====
         System.out.print("\n" + PINK + BOLD + "SYSTEM (ADMIN ONLY)" + RESET + "\n");
         if (currentAdmin.role == Role.ADMIN) {
@@ -309,7 +337,9 @@ private String centerText(String text, int width) {
                     System.out.print(SOFTGRAY + "-> " + dp.adminCount + " admins loaded.\n" + RESET);
                 }
                 break;
-
+            case "21": systemHealthCheck(); break;
+            case "22": showOrderTimeline(console); break;
+            case "23": autoCancelStaleOrders(2); break;
             case "0":
                 System.out.print(LAVENDER + "Exiting Admin Dashboard..." + RESET + "\n");
                 System.out.print(LAVENDER+ "Thank you for using E-commerce Order Fulfillment Automation System" + RESET + "\n");
@@ -413,9 +443,9 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                 // Prepare status string (with color coding for output if available)
                 String statusStr = o.status;
                 if (statusStr.equals("DELIVERED")) {
-                    statusStr = ANSI_LAVENDER_GRAY + statusStr + RESET; // Lavender for Delivered
+                    statusStr = LAVENDER + statusStr + RESET; // Lavender for Delivered
                 } else if (statusStr.equals("CANCELLED")) {
-                    statusStr = ANSI_DUSTY_ROSE + statusStr + RESET; // Dusty Rose for Cancelled
+                    statusStr = ROSE + statusStr + RESET; // Dusty Rose for Cancelled
                 } else if (statusStr.equals("PENDING")) {
                     statusStr = ANSI_SOFT_CORAL + statusStr + RESET; // Soft Coral for Pending
                 } else if (statusStr.equals("SHIPPED")) {
@@ -424,7 +454,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                 // Print order summary line with relevant details
                 System.out.print("- " + o.orderId + " | Date: " + o.date  + " | Payment: " + o.paymentMode  + " | Status: " + statusStr + " | Total: BDT " + o.totalAmount);
                 if (o.status.equals("CANCELLED") && o.cancelReason != null && !o.cancelReason.equals("")) {
-                    System.out.print(ANSI_DUSTY_ROSE+" | CancelReason: "+RESET+ ANSI_DUSTY_ROSE + o.cancelReason + RESET); // Cancel reason in pastel purple
+                    System.out.print(ROSE+" | CancelReason: "+RESET+ ROSE + o.cancelReason + RESET); // Cancel reason in pastel purple
                 }
                 System.out.print("\n");
             }
@@ -491,9 +521,9 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                 Order o = results[i];
                 String statusStr = o.status;
                 if (statusStr.equals("DELIVERED")) {
-                    statusStr = ANSI_LAVENDER_GRAY + statusStr + RESET; // Lavender for Delivered
+                    statusStr = LAVENDER + statusStr + RESET; // Lavender for Delivered
                 } else if (statusStr.equals("CANCELLED")) {
-                    statusStr = ANSI_DUSTY_ROSE + statusStr + RESET; // Dusty Rose for Cancelled
+                    statusStr = ROSE + statusStr + RESET; // Dusty Rose for Cancelled
                 } else if (statusStr.equals("PENDING")) {
                     statusStr = ANSI_SOFT_CORAL + statusStr + RESET; // Soft Coral for Pending
                 } else if (statusStr.equals("SHIPPED")) {
@@ -501,7 +531,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                 }
                 System.out.print(SOFTGRAY+"- " + o.orderId + " | Status: " + statusStr + " | Total: BDT " + o.totalAmount+RESET);
                 if (o.cancelReason != null && !o.cancelReason.equals("")) {
-                    System.out.print(ANSI_DUSTY_ROSE+" | CancelReason: " + o.cancelReason + RESET); // Cancel reason in pastel purple
+                    System.out.print(ROSE+" | CancelReason: " + o.cancelReason + RESET); // Cancel reason in pastel purple
                 }
                 System.out.print("\n");
             }
@@ -1340,7 +1370,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
         System.out.print(LAVENDER+"Date: " + order.date + "\n"+RESET);
         System.out.print(LAVENDER+"Status: " + order.status + "\n"+RESET);
         if (order.status.equalsIgnoreCase("CANCELLED")) {
-            System.out.print(ANSI_DUSTY_ROSE+"Cancel Reason: " + (order.cancelReason.equals("") ? "(None)" : order.cancelReason) + "\n"+RESET);
+            System.out.print(ROSE+"Cancel Reason: " + (order.cancelReason.equals("") ? "(None)" : order.cancelReason) + "\n"+RESET);
         }
         if (order.trackingId != null && !order.trackingId.equals("")) {
             System.out.print(LAVENDER+"Tracking ID: " + order.trackingId + "\n"+RESET);
@@ -1567,6 +1597,89 @@ private void acceptNewOrder(BufferedReader console) throws Exception {
         // If processing succeeded, the order status is now "PACKED"
         System.out.print(MINT+"New order accepted and processed successfully! New Order ID: " + newOrder.orderId + " (Status: " + newOrder.status + ").\n"+RESET);
         // (Inventory reservation and payment confirmation have been logged, and status set to PACKED)
+    }
+}
+private void systemHealthCheck() {
+    System.out.print(PINK + BOLD + "System Health Check\n" + RESET);
+    printLine();
+
+    System.out.print(MINT + "Orders loaded: " + RESET + dp.orderCount + "\n");
+    System.out.print(MINT + "Products loaded: " + RESET + dp.productCount + "\n");
+    System.out.print(MINT + "Admins loaded: " + RESET + dp.adminCount + "\n");
+
+    int low = countLowStock(5);
+    if (low > 0) {
+        System.out.print(ANSI_Yellow + "Low stock products: " + low + RESET + "\n");
+    } else {
+        System.out.print(MINT + "No low stock products" + RESET + "\n");
+    }
+
+    printLine();
+}
+
+private void showOrderTimeline(BufferedReader console) throws Exception {
+    System.out.print("Enter Order ID for timeline: ");
+    String id = console.readLine();
+    if (id == null) id = "";
+    id = id.trim();
+    if (id.equals("")) return;
+
+    id = normalizeOrderId(id);
+
+    System.out.print(PINK + BOLD + "Timeline for " + id + "\n" + RESET);
+    printLine();
+
+    BufferedReader br = null;
+    boolean found = false;
+    try {
+        br = new BufferedReader(new FileReader(dp.path("logs.txt")));
+        String line;
+        while ((line = br.readLine()) != null) {
+            if (line.contains(id)) {
+                found = true;
+                System.out.print(SOFTGRAY + "• " + RESET + line + "\n");
+            }
+        }
+    } catch (Exception e) {
+        System.out.print(ROSE + "logs.txt not found.\n" + RESET);
+    } finally {
+        if (br != null) br.close();
+    }
+
+    if (!found) {
+        System.out.print(ROSE + "No timeline entries found for " + id + RESET + "\n");
+    }
+    printLine();
+}
+
+private void autoCancelStaleOrders(int days) throws Exception {
+    java.time.LocalDate today = java.time.LocalDate.now();
+    int cancelled = 0;
+
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null) continue;
+        if (!"PENDING".equals(o.status)) continue;
+
+        try {
+            java.time.LocalDate d = java.time.LocalDate.parse(o.date); // expects YYYY-MM-DD
+            long diff = java.time.temporal.ChronoUnit.DAYS.between(d, today);
+            if (diff >= days) {
+                o.status = "CANCELLED";
+                cancelled++;
+                // if you have workflow log:
+                // log.write(o.orderId, "AUTO_CANCEL", "Order stale (" + diff + " days)");
+            }
+        } catch (Exception ex) {
+            // ignore bad date format
+        }
+    }
+
+    if (cancelled > 0) {
+        dp.saveAll();
+        System.out.print(MINT + "Auto-cancelled " + cancelled + " stale PENDING orders.\n" + RESET);
+    } else {
+        System.out.print(ROSE + "No stale PENDING orders found.\n" + RESET);
     }
 }
 

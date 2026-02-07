@@ -4,12 +4,16 @@ import java.io.FileWriter;
 
 /** Log.java – Handles workflow logging to logs.txt and viewing order timelines */
 public class Log {
+ 
+    public static final String RESET = "\u001B[0m";
+    public static final String ROSE      = "\u001B[38;5;174m"; // exit/error
+   
     private DataPersistence dp;
 
     public Log(DataPersistence dp) {
         this.dp = dp;
     }
-
+   
     /** Append a log entry to logs.txt */
     public void write(String orderId, String message) {
         try {
@@ -35,13 +39,14 @@ public class Log {
                 }
             }
             if (!foundAny) {
-                System.out.print("No log entries found for Order " + orderId + ".\n");
+                System.out.print(ROSE+"No log entries found for Order " + orderId + ".\n"+RESET);
             }
         } catch (Exception e) {
-            System.out.print("Error reading logs.\n");
+            System.out.print(ROSE+"Error reading logs.\n"+RESET);
         } finally {
             try { if (br != null) br.close(); } catch (Exception ex) { /* ignore */ }
         }
     }
+    
 }
 

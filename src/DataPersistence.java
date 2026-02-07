@@ -5,6 +5,17 @@ import java.io.FileWriter;
 
 /** DataPersistence.java – Handles loading and saving of data from text files */
 public class DataPersistence {
+    public static final String RESET = "\u001B[0m";
+ 
+
+    // Soft pastel colors
+    public static final String PINK      = "\u001B[38;5;211m"; // header / highlight
+    public static final String LAVENDER  = "\u001B[38;5;183m"; // menu numbers
+    public static final String MINT      = "\u001B[38;5;156m"; // success/allowed
+    //public static final String PEACH     = "\u001B[38;5;216m"; // warnings/restricted
+    public static final String ROSE      = "\u001B[38;5;174m"; // exit/error
+    public static final String SOFTGRAY  = "\u001B[38;5;250m"; // normal text
+
     private String baseDir;
     // Data stores in memory
     public Product[] products = new Product[200];
@@ -131,7 +142,7 @@ private void loadAdmins() throws Exception {
             try {
                 role = Role.valueOf(parts[2].trim().toUpperCase());
             } catch (Exception ex) {
-                System.out.println("Invalid role for user " + username + ". Using ADMIN by default.");
+                System.out.println(ROSE+"Invalid role for user " + username + ". Using ADMIN by default."+RESET);
                 role = Role.ADMIN; // fallback instead of skipping
             }
 
@@ -147,7 +158,7 @@ private void loadAdmins() throws Exception {
     // Debug print AFTER loading
     for (int i = 0; i < adminCount; i++) {
         if (admins[i] != null) {
-            System.out.print("Loaded admin: " + admins[i].username + " (" + admins[i].role + ")\n");
+            System.out.print(LAVENDER+"Loaded admin: " + admins[i].username + " (" + admins[i].role + ")\n"+RESET);
         }
     }
 
@@ -182,7 +193,7 @@ public void addAdmin(Admin newAdmin) {
     if (adminCount < admins.length) {
         admins[adminCount++] = newAdmin;  // Add new admin to the list
     } else {
-        System.out.println("Unable to add new admin. Admin list is full.");
+        System.out.println(ROSE+"Unable to add new admin. Admin list is full."+RESET);
     }
 }
 
@@ -386,15 +397,29 @@ public void loadTestDataFromFile(String filename) {
             }
         }
 
-        System.out.println("Test data loaded from: " + filename);
-        System.out.println("- Products added: " + productLoaded);
-        System.out.println("- Orders added: " + orderLoaded);
-        System.out.println("- Admins added: " + adminLoaded);
+        System.out.println(PINK+"Test data loaded from: " + filename+RESET);
+        System.out.println(LAVENDER+"- Products added: " + productLoaded+RESET);
+        System.out.println(LAVENDER+"- Orders added: " + orderLoaded+RESET);
+        System.out.println(LAVENDER+"- Admins added: " + adminLoaded+RESET);
 
     } catch (Exception e) {
-        System.out.println(" Failed to load test data from " + filename + ": " + e.getMessage());
+        System.out.println(ROSE+" Failed to load test data from " + filename + ": " + e.getMessage()+RESET);
     }
 }
-
+    public void appendLoginAudit(String action, String username) {
+    FileWriter fw = null;
+    try {
+        fw = new FileWriter(path("login_audit.txt"), true);
+        fw.write(action + "|" + username + "|" + currentDateTimeString() + "\n");
+    } catch (Exception e) {
+        // ignore to avoid crash
+    } finally {
+        try { if (fw != null) fw.close(); } catch (Exception ex) {}
+    }
+}
+public String currentDateTimeString() {
+    java.time.LocalDateTime dt = java.time.LocalDateTime.now();
+    return dt.toString(); // 2026-02-07T12:30:00
+}
 }
 

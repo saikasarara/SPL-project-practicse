@@ -3,6 +3,10 @@ import java.io.InputStreamReader;
 
 /** Main.java – Entry point that initializes data and starts the CLI application */
 public class Main {
+    public static final String RESET = "\u001B[0m";
+    public static final String MINT      = "\u001B[38;5;156m"; // success/allowed
+    public static final String ROSE      = "\u001B[38;5;174m"; // exit/error
+  
     public static void main(String[] args) {
         try {
             // Prepare console reader for CLI input
@@ -16,16 +20,16 @@ public class Main {
             Workflow wf = new Workflow(dp, log);
             // Secure Admin Login
             if (!wf.adminLogin(console)) {
-                System.out.print("Exiting...\n");
+                System.out.print(ROSE+"Exiting...\n"+RESET);
                 return;
             }
             // Show Admin Dashboard menu (interactive loop)
             wf.adminDashboard(console);
             // On exit, save all data back to files
             dp.saveAll();
-            System.out.print("Saved. Bye.\n");
+            System.out.print(MINT+"Saved. Bye.\n"+RESET);
         } catch (Exception e) {
-            System.out.print("Fatal Error: " + e.getMessage() + "\n");
+            System.out.print(ROSE+"Fatal Error: " + e.getMessage() + "\n"+RESET);
         }
     }
 }
