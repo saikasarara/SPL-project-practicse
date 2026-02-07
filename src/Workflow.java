@@ -98,16 +98,16 @@ private void printRoleSummary(Admin admin) {
     }
 
     if (admin.role == Role.ADMIN) {
-        System.out.print(SOFTGRAY + "• Total Orders: " + RESET + MINT + dp.orderCount + RESET + "\n");
-        System.out.print(SOFTGRAY + "• Pending: " + RESET + MINT + pending + RESET + "\n");
-        System.out.print(SOFTGRAY + "• Delivered: " + RESET + MINT + delivered + RESET + "\n");
-        System.out.print(SOFTGRAY + "• Cancelled: " + RESET + ROSE + cancelled + RESET + "\n");
+        System.out.print(SOFTGRAY + "Total Orders: " + RESET + MINT + dp.orderCount + RESET + "\n");
+        System.out.print(SOFTGRAY + "Pending: " + RESET + MINT + pending + RESET + "\n");
+        System.out.print(SOFTGRAY + "Delivered: " + RESET + MINT + delivered + RESET + "\n");
+        System.out.print(SOFTGRAY + "Cancelled: " + RESET + ROSE + cancelled + RESET + "\n");
     } else if (admin.role == Role.MANAGER) {
-        System.out.print(SOFTGRAY + "• Pending Orders: " + RESET + MINT + pending + RESET + "\n");
-        System.out.print(SOFTGRAY + "• Low Stock Items: " + RESET + ANSI_Yellow+ countLowStock(5) + RESET + "\n");
+        System.out.print(SOFTGRAY + "Pending Orders: " + RESET + MINT + pending + RESET + "\n");
+        System.out.print(SOFTGRAY + "Low Stock Items: " + RESET + ANSI_Yellow+ countLowStock(5) + RESET + "\n");
     } else {
-        System.out.print(SOFTGRAY + "• Pending Orders: " + RESET + MINT + pending + RESET + "\n");
-        System.out.print(SOFTGRAY + "• Cancelled Orders: " + RESET + ROSE + cancelled + RESET + "\n");
+        System.out.print(SOFTGRAY + "Pending Orders: " + RESET + MINT + pending + RESET + "\n");
+        System.out.print(SOFTGRAY + "Cancelled Orders: " + RESET + ROSE + cancelled + RESET + "\n");
     }
 }
 
