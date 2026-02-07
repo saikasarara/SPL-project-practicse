@@ -1484,13 +1484,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
 
     /** Helper: normalize input to full Order ID format (e.g., add 'O' prefix if missing) */
   private String normalizeOrderId(String id) {
-    id = id.trim().toUpperCase();
-    if (!id.startsWith("O")) {
-        // Remove leading zeros from numeric part
-        id = id.replaceFirst("^0+(?!$)", "");  // "01006" becomes "1006"
-        id = "O" + id;
-    }
-    return id;
+    return id.trim();
 }
 
     /** Helper: check if a string is numeric */
