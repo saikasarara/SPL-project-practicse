@@ -1736,6 +1736,7 @@ private void systemHealthCheck() {
 }
 
 private void showOrderTimeline(BufferedReader console) throws Exception {
+    showTimelinePreview();   
     System.out.print("Enter Order ID for timeline: ");
     String id = console.readLine();
     if (id == null) id = "";
@@ -1755,7 +1756,7 @@ private void showOrderTimeline(BufferedReader console) throws Exception {
         while ((line = br.readLine()) != null) {
             if (line.contains(id)) {
                 found = true;
-                System.out.print(SOFTGRAY + "• " + RESET + line + "\n");
+                System.out.print(SOFTGRAY + "- " + RESET + line + "\n");
             }
         }
     } catch (Exception e) {
@@ -2062,6 +2063,33 @@ private void showReorderPreview() {
                 stColor, st, RESET,
                 (o.paymentMode == null ? "" : o.paymentMode),
                 o.totalAmount
+        );
+    }
+
+    printLine();
+}
+private void showTimelinePreview() {
+    System.out.print(PINK + "\nOrders Available for Timeline\n" + RESET);
+    printLine();
+
+    if (dp.orderCount == 0) {
+        System.out.print(ROSE + "No orders found.\n" + RESET);
+        printLine();
+        return;
+    }
+
+    System.out.printf(LAVENDER + "%-8s %-12s %-18s\n" + RESET,
+            "OrderID", "Date", "Status");
+    System.out.print(SOFTGRAY + "----------------------------------------\n" + RESET);
+
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null) continue;
+
+        System.out.printf("%-8s %-12s %-18s\n",
+                o.orderId,
+                o.date,
+                o.status
         );
     }
 

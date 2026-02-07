@@ -102,3 +102,7 @@ Order 01025 - Inventory OK – stock reserved
 Order 01025 - PAYMENT OK (Cash on Delivery)
 Order 01025 - Status changed to PACKED
 Order 01025 - Retry successful for 01011
+Order 01026 - Inventory OK – stock reserved
+Order 01026 - PAYMENT OK (Cash on Delivery)
+Order 01026 - Status changed to PACKED
+Order 01026 - Retry successful for 01002
