@@ -937,6 +937,23 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
     /** Feature 8: Retry processing a failed (cancelled) order by creating a fresh attempt */
     private void retryCancelledOrder(BufferedReader console) throws Exception {
+            // ✅ Show cancelled orders first
+        printTitle("Cancelled Orders:");
+         boolean found = false;
+
+        for (int i = 0; i < dp.orderCount; i++) {
+             Order o = dp.orders[i];
+        if (o != null && o.status.equals("CANCELLED")) {
+            System.out.print("- " + o.orderId +
+                             " | Reason: " + o.cancelReason + "\n");
+            found = true;
+        }
+    }
+
+    if (!found) {
+        System.out.print(ROSE+"No cancelled orders to retry.\n"+RESET);
+        return;
+    }
         System.out.print(SOFTGRAY+"Enter Cancelled Order ID to retry: "+RESET);
         String cid = console.readLine();
         if (cid == null) cid = "";

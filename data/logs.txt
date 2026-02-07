@@ -80,3 +80,25 @@ Order 01020 - Inventory OK – stock reserved
 Order 01020 - PAYMENT OK (Cash on Delivery)
 Order 01020 - Status changed to PACKED
 Order 01020 - Reordered from 01011
+Order 01021 - Inventory OK – stock reserved
+Order 01021 - PAYMENT OK (Cash on Delivery)
+Order 01021 - Status changed to PACKED
+Order 01021 - Reordered from 01001
+Order 01021 - Status changed to SHIPPED
+Order 01021 - Status changed to OUT_FOR_DELIVERY
+Order 01022 - Inventory OK – stock reserved
+Order 01022 - PAYMENT OK (Cash on Delivery)
+Order 01022 - Status changed to PACKED
+Order 01022 - Reordered from 01021
+Order 01023 - Order created via admin interface (pending)
+Order 01023 - Inventory OK – stock reserved
+Order 01023 - PAYMENT OK (Cash on Delivery)
+Order 01023 - Status changed to PACKED
+Order 01024 - Inventory OK – stock reserved
+Order 01024 - PAYMENT OK (Cash on Delivery)
+Order 01024 - Status changed to PACKED
+Order 01024 - Reordered from 01019
+Order 01025 - Inventory OK – stock reserved
+Order 01025 - PAYMENT OK (Cash on Delivery)
+Order 01025 - Status changed to PACKED
+Order 01025 - Retry successful for 01011
