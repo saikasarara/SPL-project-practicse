@@ -1149,6 +1149,7 @@ private void generateReceipt(BufferedReader console) throws Exception {
 
     /** Feature 14: Increase stock of an existing product (restock) */
     private void handleRestock(BufferedReader console) throws Exception {
+        showRestockPreview();
         System.out.print(SOFTGRAY+"Enter Product ID to restock: "+RESET);
         String pid = console.readLine();
         if (pid == null) pid = "";
@@ -1940,6 +1941,50 @@ private int safeOrderTotal(Order o) {
     return total; // computed even if stored total is 0
 }
 
+private void showRestockPreview() {
+    System.out.println(PINK + BOLD + "\nProducts Needing Restock" + RESET);
+    printLine();
+
+    System.out.printf(LAVENDER + "%-8s %-22s %-12s %-10s %-8s" + RESET + "%n",
+            "ID", "Name", "Brand", "Category", "Stock");
+    System.out.println(SOFTGRAY + "------------------------------------------------------------" + RESET);
+
+    int lowCount = 0;
+    int threshold = 5; // ✅ change this if you want (ex: 10)
+
+    for (int i = 0; i < dp.productCount; i++) {
+        Product p = dp.products[i];
+        if (p == null) continue;
+
+        if (p.stock <= threshold) {
+            lowCount++;
+
+            String stockColor = (p.stock == 0) ? ROSE : ANSI_Yellow; // 0 = red, low = peach
+
+            System.out.printf("%-8s %-22s %-12s %-10s %s%-8d%s%n",
+                    p.productId,
+                    trimTo(p.name, 22),
+                    trimTo(p.brand, 12),
+                    trimTo(p.category, 10),
+                    stockColor, p.stock, RESET
+            );
+        }
+    }
+
+    if (lowCount == 0) {
+        System.out.println(MINT + "No products are low in stock right now." + RESET);
+    }
+
+    printLine();
+}
+
+// small helper so long names don't break your table
+private String trimTo(String s, int max) {
+    if (s == null) return "";
+    s = s.trim();
+    if (s.length() <= max) return s;
+    return s.substring(0, max - 3) + "...";
+}
 
    }
 
