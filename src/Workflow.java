@@ -409,85 +409,99 @@ private void addNewAdmin(BufferedReader console) throws Exception {
 
 private void handleOrderSearch(BufferedReader console) throws Exception {
     showOrdersPreview();
-    System.out.print(SOFTGRAY+"Enter Order ID or Status to search (or press Enter for advanced filter): "+RESET);
-    printLine();
+
+    System.out.print(SOFTGRAY + "Enter Order ID or Status to search (or press Enter for advanced filter): " + RESET);
     String query = console.readLine();
     if (query == null) query = "";
     query = query.trim();
+
+    // ===========================
+    // ADVANCED FILTER MODE
+    // ===========================
     if (query.equals("")) {
-        // Advanced filtering by multiple criteria
-        System.out.print(SOFTGRAY+"Enter Status to filter (or press Enter for any): "+RESET);
+        System.out.print(SOFTGRAY + "Enter Status to filter (or press Enter for any): " + RESET);
         String statusFilter = console.readLine();
         if (statusFilter == null) statusFilter = "";
         statusFilter = statusFilter.trim();
-        System.out.print(SOFTGRAY+"Enter Payment Mode to filter (or press Enter for any): "+RESET);
+
+        System.out.print(SOFTGRAY + "Enter Payment Mode to filter (or press Enter for any): " + RESET);
         String paymentFilter = console.readLine();
         if (paymentFilter == null) paymentFilter = "";
         paymentFilter = paymentFilter.trim();
-        System.out.print(SOFTGRAY+"Enter Date to filter (YYYY-MM-DD, or press Enter for any): "+RESET);
+
+        System.out.print(SOFTGRAY + "Enter Date to filter (YYYY-MM-DD, or press Enter for any): " + RESET);
         String dateFilter = console.readLine();
         if (dateFilter == null) dateFilter = "";
         dateFilter = dateFilter.trim();
-        // Convert filters to uppercase for comparison (except date which is numeric string)
+
         String statusFilterUC = statusFilter.toUpperCase();
         String paymentFilterUC = paymentFilter.toUpperCase();
+
         Order[] results = new Order[dp.orderCount];
         int count = 0;
         printLine();
+
         for (int i = 0; i < dp.orderCount; i++) {
             Order o = dp.orders[i];
             if (o == null) continue;
-            // Apply status filter if provided
-            if (!statusFilterUC.equals("") && !o.status.toUpperCase().equals(statusFilterUC)) {
+
+            if (!statusFilterUC.equals("") && (o.status == null || !o.status.toUpperCase().equals(statusFilterUC))) {
                 continue;
             }
-            // Apply payment filter if provided
-            if (!paymentFilterUC.equals("") && !o.paymentMode.toUpperCase().equals(paymentFilterUC)) {
+            if (!paymentFilterUC.equals("") && (o.paymentMode == null || !o.paymentMode.toUpperCase().equals(paymentFilterUC))) {
                 continue;
             }
-            // Apply date filter if provided
-            if (!dateFilter.equals("") && !o.date.equals(dateFilter)) {
+            if (!dateFilter.equals("") && (o.date == null || !o.date.equals(dateFilter))) {
                 continue;
             }
-            // If all specified criteria match, include this order
+
             results[count++] = o;
         }
+
         if (count == 0) {
-            System.out.print(ROSE+"No orders found matching the given criteria."+RESET+"\n");
+            System.out.print(ROSE + "No orders found matching the given criteria." + RESET + "\n");
         } else {
-            // Display summary of orders that matched all filters
             String statusCrit = statusFilter.equals("") ? "Any" : statusFilter;
             String payCrit = paymentFilter.equals("") ? "Any" : paymentFilter;
             String dateCrit = dateFilter.equals("") ? "Any" : dateFilter;
-            System.out.print(SOFTGRAY+"Orders matching filters - Status: "+RESET + statusCrit  +SOFTGRAY+ ", Payment: "+RESET + payCrit +SOFTGRAY+ ", Date: " +RESET+ dateCrit + ":\n");
+
+            System.out.print(SOFTGRAY + "Orders matching filters - Status: " + RESET + statusCrit
+                    + SOFTGRAY + ", Payment: " + RESET + payCrit
+                    + SOFTGRAY + ", Date: " + RESET + dateCrit + ":\n" + RESET);
+
             for (int i = 0; i < count; i++) {
                 Order o = results[i];
-                // Prepare status string (with color coding for output if available)
+
+                // ✅ Status color (added PACKED + OUT_FOR_DELIVERY)
                 String statusStr = o.status;
-                if (statusStr.equals("DELIVERED")) {
-                    statusStr = LAVENDER + statusStr + RESET; // Lavender for Delivered
-                } else if (statusStr.equals("CANCELLED")) {
-                    statusStr = ROSE + statusStr + RESET; // Dusty Rose for Cancelled
-                } else if (statusStr.equals("PENDING")) {
-                    statusStr = ANSI_SOFT_CORAL + statusStr + RESET; // Soft Coral for Pending
-                } else if (statusStr.equals("SHIPPED")) {
-                    statusStr = ANSI_MUTED_PEACH + statusStr + RESET; // Muted Peach for Shipped
-                }
-                // Print order summary line with relevant details
-                System.out.print("- " + o.orderId + " | Date: " + o.date  + " | Payment: " + o.paymentMode  + " | Status: " + statusStr + " | Total: BDT " + o.totalAmount);
-                if (o.status.equals("CANCELLED") && o.cancelReason != null && !o.cancelReason.equals("")) {
-                    System.out.print(ROSE+" | CancelReason: "+RESET+ ROSE + o.cancelReason + RESET); // Cancel reason in pastel purple
+                if ("DELIVERED".equals(statusStr)) statusStr = LAVENDER + statusStr + RESET;
+                else if ("CANCELLED".equals(statusStr)) statusStr = ROSE + statusStr + RESET;
+                else if ("PENDING".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+                else if ("SHIPPED".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+                else if ("PACKED".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+                else if ("OUT_FOR_DELIVERY".equals(statusStr)) statusStr = MINT+ statusStr + RESET;
+
+                int total = safeOrderTotal(o); // ✅ FIX total 0 issue
+
+                System.out.print("- " + o.orderId + " | Date: " + o.date
+                        + " | Payment: " + o.paymentMode
+                        + " | Status: " + statusStr
+                        + " | Total: BDT " + total);
+
+                if ("CANCELLED".equals(o.status) && o.cancelReason != null && !o.cancelReason.equals("")) {
+                    System.out.print(ROSE + " | CancelReason: " + o.cancelReason + RESET);
                 }
                 System.out.print("\n");
             }
+
             printLine();
-            // Optionally allow viewing details of one order from the results
-            System.out.print(SOFTGRAY+"Enter Order ID to view details (or press Enter to skip): "+RESET);
+            System.out.print(SOFTGRAY + "Enter Order ID to view details (or press Enter to skip): " + RESET);
             String selId = console.readLine();
             if (selId == null) selId = "";
             selId = selId.trim();
+
+            // ✅ STRICT: must type exact ID like 01001 (no normalizeOrderId)
             if (!selId.equals("")) {
-                selId = normalizeOrderId(selId);
                 Order target = null;
                 for (int i = 0; i < dp.orderCount; i++) {
                     Order o = dp.orders[i];
@@ -496,92 +510,101 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
                         break;
                     }
                 }
-                if (target != null) {
-                    viewOrderDetails(target);
-                } else {
-                    System.out.print(ROSE+"Order " + selId + " not found in results.\n"+RESET);
-                }
+                if (target != null) viewOrderDetails(target);
+                else System.out.print(ROSE + "Order " + selId + " not found in results.\n" + RESET);
             }
         }
         return;
     }
 
-    // Standard search by Order ID or Status (existing functionality)
-    String q = query.toUpperCase();
-    // If input is numeric, normalize to OrderID format (e.g., "1001" -> "O1001")
-    if (!q.startsWith("O") && isNumeric(q)) {
-        q = "O" + q;
-    }
-    // Try to find an exact Order ID match
+    // ===========================
+    // STANDARD SEARCH MODE
+    // ===========================
+
+    String q = query.trim();
+    String idTry=normalizeOrderId(q);
+
+    // ✅ STRICT ID RULE:
+    // Remove this old behavior:
+    // if (!q.startsWith("O") && isNumeric(q)) q = "O" + q;
+    // Now user must type EXACT orderId (01001), not 1001.
+
+    // Try exact Order ID match
     Order found = null;
     for (int i = 0; i < dp.orderCount; i++) {
         Order o = dp.orders[i];
-        if (o != null && o.orderId.toUpperCase().equals(q)) {
+        if (o != null && o.orderId != null && o.orderId.equalsIgnoreCase(idTry)) {
             found = o;
             break;
         }
     }
+
     if (found != null) {
-        // Show full details for the matched order ID
         viewOrderDetails(found);
-    } else {
-        // Treat the input as a status query (substring match on status)
-        String statusQuery = q;
-        Order[] results = new Order[dp.orderCount];
-        int count = 0;
-        for (int i = 0; i < dp.orderCount; i++) {
-            Order o = dp.orders[i];
-            if (o == null) continue;
-            if (o.status.toUpperCase().contains(statusQuery)) {
-                results[count++] = o;
-            }
+        return;
+    }
+
+    // Otherwise treat input as status query
+    String statusQuery = q;
+    Order[] results = new Order[dp.orderCount];
+    int count = 0;
+
+    for (int i = 0; i < dp.orderCount; i++) {
+        Order o = dp.orders[i];
+        if (o == null || o.status == null) continue;
+
+        if (o.status.toUpperCase().contains(statusQuery)) {
+            results[count++] = o;
         }
-        if (count == 0) {
-            System.out.print(ROSE+"No orders found matching \""+ query + "\".\n"+RESET);
-        } else {
-            System.out.print("Orders with status containing \"" + query + "\":\n");
-            for (int i = 0; i < count; i++) {
-                Order o = results[i];
-                String statusStr = o.status;
-                if (statusStr.equals("DELIVERED")) {
-                    statusStr = LAVENDER + statusStr + RESET; // Lavender for Delivered
-                } else if (statusStr.equals("CANCELLED")) {
-                    statusStr = ROSE + statusStr + RESET; // Dusty Rose for Cancelled
-                } else if (statusStr.equals("PENDING")) {
-                    statusStr = ANSI_SOFT_CORAL + statusStr + RESET; // Soft Coral for Pending
-                } else if (statusStr.equals("SHIPPED")) {
-                    statusStr = ANSI_MUTED_PEACH + statusStr + RESET; // Muted Peach for Shipped
-                }
-                System.out.print(SOFTGRAY+"- " + o.orderId + " | Status: " + statusStr + " | Total: BDT " + o.totalAmount+RESET);
-                if (o.cancelReason != null && !o.cancelReason.equals("")) {
-                    System.out.print(ROSE+" | CancelReason: " + o.cancelReason + RESET); // Cancel reason in pastel purple
-                }
-                System.out.print("\n");
+    }
+
+    if (count == 0) {
+        System.out.print(ROSE + "No orders found matching \"" + query + "\".\n" + RESET);
+    } else {
+        System.out.print("Orders with status containing \"" + query + "\":\n");
+
+        for (int i = 0; i < count; i++) {
+            Order o = results[i];
+
+            String statusStr = o.status;
+            if ("DELIVERED".equals(statusStr)) statusStr = LAVENDER + statusStr + RESET;
+            else if ("CANCELLED".equals(statusStr)) statusStr = ROSE + statusStr + RESET;
+            else if ("PENDING".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+            else if ("SHIPPED".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+            else if ("PACKED".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+            else if ("OUT_FOR_DELIVERY".equals(statusStr)) statusStr = MINT + statusStr + RESET;
+
+            int total = safeOrderTotal(o); // ✅ FIX total 0 issue
+
+            System.out.print(SOFTGRAY + "- " + o.orderId + " | Status: " + statusStr + " | Total: BDT " + total + RESET);
+
+            if (o.cancelReason != null && !o.cancelReason.equals("")) {
+                System.out.print(ROSE + " | CancelReason: " + o.cancelReason + RESET);
             }
-            // Allow viewing details of a selected order from the list
-            System.out.print(SOFTGRAY+"Enter Order ID to view details (or press Enter to skip): "+RESET);
-            String selId = console.readLine();
-            if (selId == null) selId = "";
-            selId = selId.trim();
-            if (!selId.equals("")) {
-                selId = normalizeOrderId(selId);
-                Order target = null;
-                for (int i = 0; i < dp.orderCount; i++) {
-                    Order o = dp.orders[i];
-                    if (o != null && o.orderId.equalsIgnoreCase(selId)) {
-                        target = o;
-                        break;
-                    }
-                }
-                if (target != null) {
-                    viewOrderDetails(target);
-                } else {
-                    System.out.print(ROSE+"Order " + selId + " not found in results.\n"+RESET);
+            System.out.print("\n");
+        }
+
+        System.out.print(SOFTGRAY + "Enter Order ID to view details (or press Enter to skip): " + RESET);
+        String selId = console.readLine();
+        if (selId == null) selId = "";
+        selId = selId.trim();
+
+        // ✅ STRICT ID (no normalizeOrderId)
+        if (!selId.equals("")) {
+            Order target = null;
+            for (int i = 0; i < dp.orderCount; i++) {
+                Order o = dp.orders[i];
+                if (o != null && o.orderId.equalsIgnoreCase(selId)) {
+                    target = o;
+                    break;
                 }
             }
+            if (target != null) viewOrderDetails(target);
+            else System.out.print(ROSE + "Order " + selId + " not found in results.\n" + RESET);
         }
     }
 }
+
 
 
     /** Feature 6: Manually progress an order status through the workflow (PENDING -> PACKED -> SHIPPED -> OUT_FOR_DELIVERY -> DELIVERED) */
@@ -1505,12 +1528,23 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
 
 
     /** Helper: normalize input to full Order ID format (e.g., add 'O' prefix if missing) */
-private String normalizeOrderId(String id) {
-    id = id.toUpperCase();
-    if (!id.startsWith("O")) {
-        id = "O" + id;
+private String normalizeOrderId(String input) {
+    if (input == null) return "";
+    String s = input.trim();
+
+    // Remove optional 'O' prefix if user types it
+    if (s.length() > 0 && (s.charAt(0) == 'O' || s.charAt(0) == 'o')) {
+        s = s.substring(1).trim();
     }
-    return id;
+
+    // If numeric, pad to 5 digits (01001 style)
+    if (isNumeric(s)) {
+        while (s.length() < 5) s = "0" + s;
+        return s;
+    }
+
+    // Otherwise return as-is (maybe they typed status)
+    return input.trim();
 }
 
     /** Helper: check if a string is numeric */
@@ -1867,6 +1901,20 @@ private void printProductSummary() {
     System.out.println(SOFTGRAY + "Out of Stock: " + RESET + ROSE + outOfStock + RESET);
     printLine();
 }
+private int safeOrderTotal(Order o) {
+    if (o == null) return 0;
+    if (o.totalAmount > 0) return o.totalAmount; // already correct
+
+    int total = 0;
+    for (int i = 0; i < o.itemCount; i++) {
+        Item it = o.items[i];
+        if (it == null) continue;
+        Product p = dp.findProductById(it.productId);
+        if (p != null) total += p.price * it.quantity;
+    }
+    return total; // computed even if stored total is 0
+}
+
 
    }
 
