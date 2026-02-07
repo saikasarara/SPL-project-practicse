@@ -1,7 +1,7 @@
 M101|Smartphone|Samsung|Galaxy A14 (4/64)|19999|0
 M102|Smartphone|Xiaomi|Redmi 12 (8/128)|18999|1
 M103|Smartphone|Realme|C55 (8/128)|19500|1
-M104|Smartphone|Nokia|G21 (6/128)|17500|1
+M104|Smartphone|Nokia|G21 (6/128)|17500|0
 L201|Laptop|HP|Pavilion 15 (i5)|72000|6
 L202|Laptop|Dell|Inspiron 14 (i5)|75000|5
 L203|Laptop|Lenovo|IdeaPad 3 (i5)|68000|8

@@ -62,3 +62,8 @@ Order O1003 - PAYMENT OK (MockCard approved)
 Order O1003 - Status changed to PACKED
 Order O1003 - Status changed to SHIPPED
 Order O1003 - Status changed to OUT_FOR_DELIVERY
+Order O1018 - Order created via admin interface (pending)
+Order O1018 - Inventory OK – stock reserved
+Order O1018 - PAYMENT OK (Cash on Delivery)
+Order O1018 - Status changed to PACKED
+Order O1018 - Status changed to SHIPPED

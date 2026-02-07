@@ -88,27 +88,49 @@ private String centerText(String text, int width) {
 }
 private void printRoleSummary(Admin admin) {
     printTitle("Quick Summary");
-    int pending = 0, delivered = 0, cancelled = 0;
-    for (int i = 0; i < dp.orderCount; i++) {
-        Order o = dp.orders[i];
-        if (o == null) continue;
-        if ("PENDING".equals(o.status)) pending++;
-        else if ("DELIVERED".equals(o.status)) delivered++;
-        else if ("CANCELLED".equals(o.status)) cancelled++;
-    }
+   int pending = 0;
+int packed = 0;
+int shipped = 0;
+int outForDelivery = 0;
+int delivered = 0;
+int cancelled = 0;
 
-    if (admin.role == Role.ADMIN) {
-        System.out.print(SOFTGRAY + "Total Orders: " + RESET + MINT + dp.orderCount + RESET + "\n");
-        System.out.print(SOFTGRAY + "Pending: " + RESET + MINT + pending + RESET + "\n");
-        System.out.print(SOFTGRAY + "Delivered: " + RESET + MINT + delivered + RESET + "\n");
-        System.out.print(SOFTGRAY + "Cancelled: " + RESET + ROSE + cancelled + RESET + "\n");
-    } else if (admin.role == Role.MANAGER) {
-        System.out.print(SOFTGRAY + "Pending Orders: " + RESET + MINT + pending + RESET + "\n");
-        System.out.print(SOFTGRAY + "Low Stock Items: " + RESET + ANSI_Yellow+ countLowStock(5) + RESET + "\n");
-    } else {
-        System.out.print(SOFTGRAY + "Pending Orders: " + RESET + MINT + pending + RESET + "\n");
-        System.out.print(SOFTGRAY + "Cancelled Orders: " + RESET + ROSE + cancelled + RESET + "\n");
+for (int i = 0; i < dp.orderCount; i++) {
+    Order o = dp.orders[i];
+    if (o == null || o.status == null) continue;
+
+    switch (o.status) {
+        case "PENDING":
+            pending++;
+            break;
+        case "PACKED":
+            packed++;
+            break;
+        case "SHIPPED":
+            shipped++;
+            break;
+        case "OUT_FOR_DELIVERY":
+            outForDelivery++;
+            break;
+        case "DELIVERED":
+            delivered++;
+            break;
+        case "CANCELLED":
+            cancelled++;
+            break;
     }
+}
+    int activeOrders = packed + shipped + outForDelivery;
+       System.out.println(SOFTGRAY + "Total Orders: " + RESET + MINT + dp.orderCount + RESET);
+       System.out.println(SOFTGRAY + "Active Orders: " + RESET + MINT + activeOrders + RESET);
+       System.out.println(SOFTGRAY + "Pending: " + RESET + MINT+ pending + RESET);
+       System.out.println(SOFTGRAY + "Packed: " + RESET + MINT + packed + RESET);
+       System.out.println(SOFTGRAY + "Shipped: " + RESET + MINT + shipped + RESET);
+       System.out.println(SOFTGRAY + "Out for Delivery: " + RESET + MINT + outForDelivery + RESET);
+       System.out.println(SOFTGRAY + "Delivered: " + RESET + MINT + delivered + RESET);
+       System.out.println(SOFTGRAY + "Cancelled: " + RESET +ROSE+ cancelled + RESET);
+       printLine();
+       printProductSummary();  
 }
 
 private int countLowStock(int threshold) {
@@ -1476,7 +1498,7 @@ private boolean processPendingOrder(Order order, BufferedReader console) throws 
         FileWriter fw = new FileWriter(dp.path("report.txt"), false);
         fw.write(report.toString());
         fw.close();
-        System.out.print("=== Report Summary ===\n");
+        printTitle("Report Summary");
         System.out.print(report.toString());
         System.out.print(MINT+"(Full report saved to report.txt)\n"+RESET);
     }
@@ -1822,6 +1844,27 @@ private void showProductsPreview() {
 
     printLine();
     System.out.print(SOFTGRAY + "Tip: Choose B for Brand or C for Category, then type a keyword.\n" + RESET);
+    printLine();
+}
+private void printProductSummary() {
+    int totalProducts = dp.productCount;
+    int inStock = 0;
+    int lowStock = 0;
+    int outOfStock = 0;
+
+    for (int i = 0; i < dp.productCount; i++) {
+        Product p = dp.products[i];
+        if (p == null) continue;
+
+        if (p.stock <= 0) outOfStock++;
+        else if (p.stock <= 5) lowStock++;
+        else inStock++;
+    }
+    printTitle("Product Summary");
+    System.out.println(SOFTGRAY + "Total Products: " + RESET + MINT + totalProducts + RESET);
+    System.out.println(SOFTGRAY + "In Stock: " + RESET + MINT + inStock + RESET);
+    System.out.println(SOFTGRAY + "Low Stock (<=5): " + RESET + ANSI_Yellow + lowStock + RESET);
+    System.out.println(SOFTGRAY + "Out of Stock: " + RESET + ROSE + outOfStock + RESET);
     printLine();
 }
 
