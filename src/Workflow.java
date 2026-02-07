@@ -149,12 +149,6 @@ private int countLowStock(int threshold) {
 
     // Always refresh current admin (in case index changes later)
     Admin currentAdmin = dp.admins[dp.currentAdminIndex];
-
-    // 🌸 Pink/Rose -> headings, titles
-    // 💜 Lavender  -> menu labels/numbers
-    // 🌿 Mint      -> success / allowed actions
-    // 🧡 Peach     -> warnings / limited actions
-    // 🤍 Soft gray -> normal text
       printDashboardBox(currentAdmin);
       printLine();
     while (true) {
@@ -212,12 +206,12 @@ private int countLowStock(int threshold) {
             System.out.print(LAVENDER + "22." + RESET + " " + MINT + "Change Admin Password" + RESET + "\n");
             System.out.print(LAVENDER + "23." + RESET + " " + MINT + "Generate Report" + RESET + "\n");
         } else {
-            System.out.print(LAVENDER + "11." + RESET + " " + ROSE + "Bulk Import Orders (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "12." + RESET + " " + ROSE + "Archive Delivered Orders (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "15." + RESET + " " + ROSE + "Clear Logs (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "16." + RESET + " " + ROSE + "Add New Admin (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "17." + RESET + " " + ROSE + "Change Admin Password (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "18." + RESET + " " + ROSE + "Generate Report (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "18." + RESET + " " + ROSE + "Bulk Import Orders (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "19." + RESET + " " + ROSE + "Archive Delivered Orders (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "20." + RESET + " " + ROSE + "Clear Logs (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "21." + RESET + " " + ROSE + "Add New Admin (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "22." + RESET + " " + ROSE + "Change Admin Password (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "23." + RESET + " " + ROSE + "Generate Report (Admin only)" + RESET + "\n");
         }
        
         // ===== EXIT =====

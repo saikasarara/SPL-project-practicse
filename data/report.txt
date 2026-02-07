@@ -1,8 +1,8 @@
-Total Orders: 15
-Completed Orders: 4
-Cancelled Orders: 9
-Total Revenue: BDT 899955
+Total Orders: 25
+Completed Orders: 5
+Cancelled Orders: 10
+Total Revenue: BDT 0
 Top 3 Cancellation Reasons:
-1. Inventory Shortage: M101 – 6
+1. Inventory Shortage: M101 – 7
 2. Payment Declined  # Cancelled due to payment failure – 1
 3. Inventory Shortage   # Cancelled due to stock shortage – 1
