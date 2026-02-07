@@ -1077,7 +1077,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         }
         fw.write("--------------------------------------\n");
         fw.write("Total Paid: BDT " + order.totalAmount + "\n");
-        fw.write(MINT+"Thank you for your purchase!\n"+RESET);
+        fw.write("Thank you for your purchase!\n");
         fw.close();
         System.out.print(SOFTGRAY+"Receipt generated: " + filename + "\n"+RESET);
     }

@@ -1,0 +1,9 @@
+Receipt for Order O1016
+Address: Dhaka
+Status: DELIVERED
+Tracking ID: (Unavailable)
+Items:
+--------------------------------------
+Total Paid: BDT 0
+[38;5;156mThank you for your purchase!
+[0m
