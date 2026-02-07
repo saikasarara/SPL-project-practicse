@@ -1,5 +1,5 @@
-Total Orders: 25
-Completed Orders: 5
+Total Orders: 22
+Completed Orders: 0
 Cancelled Orders: 10
 Total Revenue: BDT 0
 Top 3 Cancellation Reasons:

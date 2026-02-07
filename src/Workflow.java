@@ -308,11 +308,12 @@ private int countLowStock(int threshold) {
             case "17": autoCancelStaleOrders(2); break;
             case "18":
                 if (currentAdmin.role == Role.ADMIN) {
-                    generateReport();
+                    importOrdersFromFile(console);
                 } else {
                     System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
+            
             case "19":
                 if (currentAdmin.role == Role.ADMIN) {
                     archiveDeliveredOrders(console);
@@ -344,14 +345,14 @@ private int countLowStock(int threshold) {
                 }
                 break;
     
-
             case "23":
                 if (currentAdmin.role == Role.ADMIN) {
-                    importOrdersFromFile(console);
+                    generateReport();
                 } else {
                     System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
+            
 
             case "0":
                 System.out.print(LAVENDER + "Exiting Admin Dashboard..." + RESET + "\n");
