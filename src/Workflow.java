@@ -26,7 +26,7 @@ public class Workflow {
     public static final String PINK      = "\u001B[38;5;211m"; // header / highlight
     public static final String LAVENDER  = "\u001B[38;5;183m"; // menu numbers
     public static final String MINT      = "\u001B[38;5;156m"; // success/allowed
-    public static final String PEACH     = "\u001B[38;5;216m"; // warnings/restricted
+   //  public static final String PEACH     = "\u001B[38;5;216m"; // warnings/restricted
     public static final String ROSE      = "\u001B[38;5;174m"; // exit/error
     public static final String SOFTGRAY  = "\u001B[38;5;250m"; // normal text
 
@@ -138,10 +138,10 @@ private String centerText(String text, int width) {
             System.out.print(LAVENDER + "10." + RESET + " " + MINT + "Export Stock Report" + RESET + "\n");
         } else {
             // show restricted in peach (professional)
-            System.out.print(LAVENDER + " 7." + RESET + " " + PEACH + "Manage Products (Admin/Manager only)" + RESET + "\n");
-            System.out.print(LAVENDER + " 8." + RESET + " " + PEACH + "Low Stock Alerts (Admin/Manager only)" + RESET + "\n");
-            System.out.print(LAVENDER + " 9." + RESET + " " + PEACH + "Restock Product (Admin/Manager only)" + RESET + "\n");
-            System.out.print(LAVENDER + "10." + RESET + " " + PEACH + "Export Stock Report (Admin/Manager only)" + RESET + "\n");
+            System.out.print(LAVENDER + " 7." + RESET + " " + ROSE + "Manage Products (Admin/Manager only)" + RESET + "\n");
+            System.out.print(LAVENDER + " 8." + RESET + " " + ROSE + "Low Stock Alerts (Admin/Manager only)" + RESET + "\n");
+            System.out.print(LAVENDER + " 9." + RESET + " " + ROSE + "Restock Product (Admin/Manager only)" + RESET + "\n");
+            System.out.print(LAVENDER + "10." + RESET + " " + ROSE + "Export Stock Report (Admin/Manager only)" + RESET + "\n");
         }
 
         // ===== OPERATIONS =====
@@ -161,16 +161,16 @@ private String centerText(String text, int width) {
             System.out.print(LAVENDER + "17." + RESET + " " + MINT + "Change Admin Password" + RESET + "\n");
             System.out.print(LAVENDER + "18." + RESET + " " + MINT + "Generate Report" + RESET + "\n");
         } else {
-            System.out.print(LAVENDER + "11." + RESET + " " + PEACH + "Bulk Import Orders (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "12." + RESET + " " + PEACH + "Archive Delivered Orders (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "15." + RESET + " " + PEACH + "Clear Logs (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "16." + RESET + " " + PEACH + "Add New Admin (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "17." + RESET + " " + PEACH + "Change Admin Password (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER + "18." + RESET + " " + PEACH + "Generate Report (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "11." + RESET + " " + ROSE + "Bulk Import Orders (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "12." + RESET + " " + ROSE + "Archive Delivered Orders (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "15." + RESET + " " + ROSE + "Clear Logs (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "16." + RESET + " " + ROSE + "Add New Admin (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "17." + RESET + " " + ROSE + "Change Admin Password (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER + "18." + RESET + " " + ROSE + "Generate Report (Admin only)" + RESET + "\n");
         }
 
         // ===== EXIT =====
-        System.out.print("\n" + LAVENDER + " 0." + RESET + " " + PEACH + "Exit" + RESET + "\n");
+        System.out.print("\n" + LAVENDER + " 0." + RESET + " " + ROSE + "Exit" + RESET + "\n");
         printLine();
         System.out.print(PINK + BOLD + "Please select an option → " + RESET);
 
@@ -214,7 +214,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     handleProductManagement(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -222,7 +222,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     showLowStockAlerts();
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -230,7 +230,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     handleRestock(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -238,7 +238,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN || currentAdmin.role == Role.MANAGER) {
                     exportStockReport();
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin/Manager only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin/Manager only." + RESET);
                 }
                 break;
 
@@ -246,7 +246,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     importOrdersFromFile(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -254,7 +254,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     archiveDeliveredOrders(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -265,7 +265,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     clearLogs(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -273,7 +273,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     addNewAdmin(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -281,7 +281,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     changeAdminPassword(console);
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -289,7 +289,7 @@ private String centerText(String text, int width) {
                 if (currentAdmin.role == Role.ADMIN) {
                     generateReport();
                 } else {
-                    System.out.println(PEACH + "Restricted: Admin only." + RESET);
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
                 }
                 break;
 
@@ -311,12 +311,12 @@ private String centerText(String text, int width) {
                 break;
 
             case "0":
-                System.out.print(PEACH + "Exiting Admin Dashboard..." + RESET + "\n");
-                System.out.print(PEACH + "Thank you for using E-commerce Order Fulfillment Automation System" + RESET + "\n");
+                System.out.print(LAVENDER + "Exiting Admin Dashboard..." + RESET + "\n");
+                System.out.print(LAVENDER+ "Thank you for using E-commerce Order Fulfillment Automation System" + RESET + "\n");
                 return;
 
             default:
-                System.out.print(PEACH + "Invalid option. Please try again." + RESET + "\n");
+                System.out.print(ROSE + "Invalid option. Please try again." + RESET + "\n");
                 break;
         }
 
@@ -328,7 +328,7 @@ private void addNewAdmin(BufferedReader console) throws Exception {
     // Only allow current admin to add new admin if they have the ADMIN role
     Admin currentAdmin = dp.admins[dp.currentAdminIndex];
     if (currentAdmin == null || !currentAdmin.hasPermission(Role.ADMIN)) {
-        System.out.print(PEACH+"Permission denied. Only admins can add new admins."+RESET+"\n");
+        System.out.print(ROSE+"Permission denied. Only admins can add new admins."+RESET+"\n");
         return;
     }
 
@@ -690,7 +690,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
     /** Feature 13: Display low stock items (stock < 5) highlighted in color */
     private void showLowStockAlerts() {
         boolean anyLow = false;
-        System.out.print(PEACH+"Low Stock Items (stock < 5):\n"+RESET);
+        System.out.print(ANSI_Yellow+"Low Stock Items (stock < 5):\n"+RESET);
         for (int i = 0; i < dp.productCount; i++) {
             Product p = dp.products[i];
             if (p == null) continue;
@@ -978,7 +978,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
     /** Feature 14: Clear all logs (logs.txt) after confirmation */
     private void clearLogs(BufferedReader console) throws Exception {
-        System.out.print(PEACH+"Are you sure you want to clear all logs? (Y/N): "+RESET);
+        System.out.print(ANSI_Yellow+"Are you sure you want to clear all logs? (Y/N): "+RESET);
         String confirm = console.readLine();
         if (confirm == null) confirm = "";
         confirm = confirm.trim();
