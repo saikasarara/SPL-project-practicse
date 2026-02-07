@@ -37,6 +37,27 @@ public class DataPersistence {
     }
     return baseDir + "/" + filename; // e.g. "data/admins.txt"
 }
+private String normalizeOrderIdForUI(String id) {
+    if (id == null) return "";
+    id = id.trim();
+    if (id.length() == 0) return "";
+
+    // If starts with O -> remove it
+    if (id.startsWith("O") || id.startsWith("o")) id = id.substring(1);
+
+    // Keep only digits
+    String num = "";
+    for (int i = 0; i < id.length(); i++) {
+        char c = id.charAt(i);
+        if (c >= '0' && c <= '9') num += c;
+    }
+    if (num.length() == 0) return "";
+
+    // Pad to 5 digits
+    while (num.length() < 5) num = "0" + num;
+    return num;
+}
+
 
 
     /** Load all data from files: products, orders, admins */
@@ -94,7 +115,7 @@ public class DataPersistence {
             if (parts.length < 5) continue;
 
             Order o = new Order();
-            o.orderId = parts[0].trim();
+            o.orderId = normalizeOrderIdForUI(parts[0]);
             o.date = (parts.length > 1 ? parts[1].trim() : "");
             o.address = (parts.length > 2 ? parts[2].trim() : "");
             o.paymentMode = (parts.length > 3 ? parts[3].trim() : "");
@@ -289,36 +310,44 @@ public void addAdmin(Admin newAdmin) {
 
     /** Determine nextOrderNumber by finding the max numeric part of loaded order IDs */
     private void computeNextOrderNumber() {
-        int maxNum = 1000;
-        for (int i = 0; i < orderCount; i++) {
-            Order o = orders[i];
-            if (o == null) continue;
-            String id = o.orderId;
-            // Assuming OrderID starts with a letter followed by number (e.g., "O1001")
-            String numPart = "";
-            for (int k = 0; k < id.length(); k++) {
-                char ch = id.charAt(k);
-                if (ch >= '0' && ch <= '9') {
-                    numPart += ch;
-                }
-            }
-            int num = toInt(numPart);
-            if (num > maxNum) {
-                maxNum = num;
+    int maxNum = 0;
+
+    for (int i = 0; i < orderCount; i++) {
+        Order o = orders[i];
+        if (o == null || o.orderId == null) continue;
+
+        String id = o.orderId;
+
+        // extract numeric part from ID (works for O1019, 01019, 1019)
+        String numPart = "";
+        for (int k = 0; k < id.length(); k++) {
+            char ch = id.charAt(k);
+            if (ch >= '0' && ch <= '9') {
+                numPart += ch;
             }
         }
-        // Next order number continues from max found
-        if (maxNum >= 1000) {
-            nextOrderNumber = maxNum + 1;
+
+        int num = toInt(numPart);
+        if (num > maxNum) {
+            maxNum = num;
         }
     }
 
+    // ✅ set next order number AFTER loop
+    nextOrderNumber = maxNum + 1;
+}
+
+
     /** Generate a new unique Order ID (e.g., "O1001", "O1002", ...) */
-    public String generateOrderId() {
-        String newId = "O" + nextOrderNumber;
-        nextOrderNumber++;
-        return newId;
-    }
+   public String generateOrderId() {
+    int n = nextOrderNumber;
+    nextOrderNumber++;
+
+    String s = "" + n;
+    while (s.length() < 5) s = "0" + s; // 1001 -> 01001
+    return s;
+}
+
 
 /** Parse an "ItemList" string into Item objects added to Order
  *  Supported formats:
@@ -365,15 +394,18 @@ public void parseItemsIntoOrder(Order o, String itemsPart) {
 
 
     /** Find a Product by its ID (case-sensitive match). Returns null if not found. */
-    public Product findProductById(String productId) {
-        for (int i = 0; i < productCount; i++) {
-            Product p = products[i];
-            if (p != null && p.productId.equals(productId)) {
-                return p;
-            }
+   public Product findProductById(String productId) {
+    if (productId == null) return null;
+    String key = productId.trim();
+    for (int i = 0; i < productCount; i++) {
+        Product p = products[i];
+        if (p != null && p.productId != null && p.productId.trim().equalsIgnoreCase(key)) {
+            return p;
         }
-        return null;
     }
+    return null;
+}
+
 
 
 public void loadTestDataFromFile(String filename) {
