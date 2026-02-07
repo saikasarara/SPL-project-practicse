@@ -680,6 +680,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
     /** Feature 6 (continued): View or filter products by brand or category */
     private void handleAdvancedFilter(BufferedReader console) throws Exception {
+        showProductsPreview();
         System.out.print(SOFTGRAY+"Filter by Brand or Category? (B/C): "+RESET);
         String choice = console.readLine();
         if (choice == null) choice = "";
@@ -1026,61 +1027,80 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
     }
 
     /** Feature 16: Generate a receipt text file for a delivered order */
-    private void generateReceipt(BufferedReader console) throws Exception {
-        System.out.print(SOFTGRAY+"Enter Order ID for receipt: "+RESET);
-        String rid = console.readLine();
-        if (rid == null) rid = "";
-        rid = rid.trim();
-        if (rid.equals("")) {
-            System.out.print(ROSE+"Order ID cannot be empty.\n"+RESET);
-            return;
-        }
-        rid = normalizeOrderId(rid);
-        Order order = null;
-        for (int i = 0; i < dp.orderCount; i++) {
-            if (dp.orders[i] != null && dp.orders[i].orderId.equalsIgnoreCase(rid)) {
-                order = dp.orders[i];
-                break;
-            }
-        }
-        if (order == null) {
-            System.out.print(ROSE+"Order " + rid + " not found.\n"+RESET);
-            return;
-        }
-        if (!order.status.equals("DELIVERED")) {
-            System.out.print(SOFTGRAY+"Receipt can only be generated for delivered orders.\n"+RESET);
-            return;
-        }
-        // Create receipt file with order details
-        String filename = "receipt_" + order.orderId + ".txt";
-        FileWriter fw = new FileWriter(dp.path(filename), false);
-        fw.write("Receipt for Order " + order.orderId + "\n");
-        fw.write("Address: " + (order.address.equals("") ? "(Not Provided)" : order.address) + "\n");
-        fw.write("Status: " + order.status + "\n");
-        if (order.trackingId != null && !order.trackingId.equals("")) {
-            fw.write("Tracking ID: " + order.trackingId + "\n");
-        } else {
-            if (order.status.equalsIgnoreCase("SHIPPED") || order.status.equalsIgnoreCase("OUT_FOR_DELIVERY")) {
-                fw.write("Tracking ID: (In transit)\n");
-            } else {
-                fw.write("Tracking ID: (Unavailable)\n");
-            }
-        }
-        fw.write("Items:\n");
-        for (int j = 0; j < order.itemCount; j++) {
-            Item it = order.items[j];
-            if (it == null) continue;
-            Product p = dp.findProductById(it.productId);
-            String itemName = (p != null ? p.name : it.productId);
-            int priceEach = (p != null ? p.price : 0);
-            fw.write("- " + itemName + " (x" + it.quantity + " @ BDT " + priceEach + " each)\n");
-        }
-        fw.write("--------------------------------------\n");
-        fw.write("Total Paid: BDT " + order.totalAmount + "\n");
-        fw.write("Thank you for your purchase!\n");
-        fw.close();
-        System.out.print(SOFTGRAY+"Receipt generated: " + filename + "\n"+RESET);
+private void generateReceipt(BufferedReader console) throws Exception {
+    showOrdersPreview();
+
+    System.out.print(SOFTGRAY + "Enter Order ID for receipt: " + RESET);
+    String rid = console.readLine();
+    if (rid == null) rid = "";
+    rid = rid.trim();
+
+    if (rid.equals("")) {
+        System.out.print(ROSE + "Order ID cannot be empty.\n" + RESET);
+        return;
     }
+
+    rid = normalizeOrderId(rid);
+
+    Order order = null;
+    for (int i = 0; i < dp.orderCount; i++) {
+        if (dp.orders[i] != null && dp.orders[i].orderId.equalsIgnoreCase(rid)) {
+            order = dp.orders[i];
+            break;
+        }
+    }
+
+    if (order == null) {
+        System.out.print(ROSE + "Order " + rid + " not found.\n" + RESET);
+        return;
+    }
+
+    // ✅ safer status check
+    if (!"DELIVERED".equalsIgnoreCase(order.status)) {
+        System.out.print(ROSE + "Receipt can only be generated for delivered orders.\n" + RESET);
+        return;
+    }
+
+    // Create receipt file with order details
+    String filename = "receipt_" + order.orderId + ".txt";
+    FileWriter fw = new FileWriter(dp.path(filename), false);
+
+    fw.write("Receipt for Order " + order.orderId + "\n");
+
+    // ✅ safe address check
+    String addr = (order.address == null || order.address.trim().equals("")) ? "(Not Provided)" : order.address.trim();
+    fw.write("Address: " + addr + "\n");
+
+    fw.write("Status: " + order.status + "\n");
+
+    // ✅ tracking id logic that actually makes sense for DELIVERED receipts
+    if (order.trackingId != null && !order.trackingId.trim().equals("")) {
+        fw.write("Tracking ID: " + order.trackingId.trim() + "\n");
+    } else {
+        fw.write("Tracking ID: (Not assigned)\n");
+    }
+
+    fw.write("Items:\n");
+    for (int j = 0; j < order.itemCount; j++) {
+        Item it = order.items[j];
+        if (it == null) continue;
+
+        Product p = dp.findProductById(it.productId);
+        String itemName = (p != null ? p.name : it.productId);
+        int priceEach = (p != null ? p.price : 0);
+
+        fw.write("- " + itemName + " (x" + it.quantity + " @ BDT " + priceEach + " each)\n");
+    }
+
+    fw.write("--------------------------------------\n");
+    fw.write("Total Paid: BDT " + order.totalAmount + "\n");
+    fw.write("Thank you for your purchase!\n");
+
+    fw.close();
+
+    System.out.print(MINT + "Receipt generated: " + filename + "\n" + RESET);
+}
+
 
     /** Feature 14: Increase stock of an existing product (restock) */
     private void handleRestock(BufferedReader console) throws Exception {
@@ -1766,6 +1786,44 @@ private void showOrdersPreview() {
         );
     }
 
+    printLine();
+}
+
+private void showProductsPreview() {
+    System.out.print(PINK + BOLD + "\nProduct List (Preview)\n" + RESET);
+    printLine();
+
+    if (dp.productCount == 0) {
+        System.out.print(ROSE + "No products available.\n" + RESET);
+        printLine();
+        return;
+    }
+
+    // Header
+    System.out.printf(LAVENDER + "%-10s %-20s %-12s %-14s %-8s\n" + RESET,
+            "ProdID", "Name", "Brand", "Category", "Stock");
+    System.out.print(SOFTGRAY + "---------------------------------------------------------------\n" + RESET);
+
+    for (int i = 0; i < dp.productCount; i++) {
+        Product p = dp.products[i];
+        if (p == null) continue;
+
+        // Stock color highlight
+        String stockColor = SOFTGRAY;
+        if (p.stock <= 5) stockColor = ANSI_Yellow;  // low stock
+        else stockColor = MINT;
+
+        System.out.printf("%-10s %-20s %-12s %-14s %s%-8d%s\n",
+                p.productId,
+                p.name,
+                (p.brand == null ? "" : p.brand),
+                (p.category == null ? "" : p.category),
+                stockColor, p.stock, RESET
+        );
+    }
+
+    printLine();
+    System.out.print(SOFTGRAY + "Tip: Choose B for Brand or C for Category, then type a keyword.\n" + RESET);
     printLine();
 }
 
