@@ -1,1 +1,12 @@
 Order ADMIN - Password changed
+Order 02004 - Order created via admin interface (pending)
+Order 02004 - Inventory OK – stock reserved
+Order 02004 - PAYMENT OK (Cash on Delivery)
+Order 02004 - Status changed to PACKED
+Order 02004 - Status changed to SHIPPED
+Order 02006 - Order created via admin interface (pending)
+Order 02006 - Inventory OK – stock reserved
+Order 02006 - PAYMENT OK (MockCard approved)
+Order 02006 - Status changed to PACKED
+Order 02006 - Status changed to SHIPPED
+Order ADMIN - Edited product M101 (Price changed)

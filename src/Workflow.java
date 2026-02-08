@@ -205,6 +205,11 @@ private int countLowStock(int threshold) {
             System.out.print(LAVENDER + "21." + RESET + " " + MINT + "Add New Admin" + RESET + "\n");
             System.out.print(LAVENDER + "22." + RESET + " " + MINT + "Change Admin Password" + RESET + "\n");
             System.out.print(LAVENDER + "23." + RESET + " " + MINT + "Generate Report" + RESET + "\n");
+            System.out.print(LAVENDER+"24."+RESET+" " + MINT+ "Delete ALL Order History" + RESET + "\n");
+            System.out.print(LAVENDER+"25."+RESET+" " + MINT + "Restore Order History (Archive)" + RESET + "\n");
+            System.out.print(LAVENDER+"26."+RESET +" "+ MINT + "Undo Last Restore" + RESET + "\n");
+
+
         } else {
             System.out.print(LAVENDER + "18." + RESET + " " + ROSE + "Bulk Import Orders (Admin only)" + RESET + "\n");
             System.out.print(LAVENDER + "19." + RESET + " " + ROSE + "Archive Delivered Orders (Admin only)" + RESET + "\n");
@@ -212,6 +217,11 @@ private int countLowStock(int threshold) {
             System.out.print(LAVENDER + "21." + RESET + " " + ROSE + "Add New Admin (Admin only)" + RESET + "\n");
             System.out.print(LAVENDER + "22." + RESET + " " + ROSE + "Change Admin Password (Admin only)" + RESET + "\n");
             System.out.print(LAVENDER + "23." + RESET + " " + ROSE + "Generate Report (Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER+"24."+RESET +" "+ ROSE + "Delete ALL Order History" + RESET + "\n");
+            System.out.print(LAVENDER+"25."+RESET + " "+ROSE + "Restore Order History (Archive)" + RESET + "\n");
+            System.out.print(LAVENDER+"26."+RESET + " "+ROSE + "Undo Last Restore" + RESET + "\n");
+
+
         }
        
         // ===== EXIT =====
@@ -353,7 +363,29 @@ private int countLowStock(int threshold) {
                 }
                 break;
             
+            case "24":
+                  if (currentAdmin.role == Role.ADMIN) {
+                    deleteAllOrderHistory(console);
+                } else {
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
+                }
+                break;case "25":
+                  if (currentAdmin.role == Role.ADMIN) {
+                    restoreOrdersFromArchive(console);
+                } else {
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
+                }
+                break;
 
+            case "26":
+                  if (currentAdmin.role == Role.ADMIN) {
+                      undoLastRestore(console);
+                } else {
+                    System.out.println(ROSE + "Restricted: Admin only." + RESET);
+                }
+                break;    
+
+  
             case "0":
                 System.out.print(LAVENDER + "Exiting Admin Dashboard..." + RESET + "\n");
                 System.out.print(LAVENDER+ "Thank you for using E-commerce Order Fulfillment Automation System" + RESET + "\n");
@@ -1260,6 +1292,7 @@ private void handleProductManagement(BufferedReader console) throws Exception {
 
     } else if (action.equals("E")) {
         // Edit existing product
+         showProductsPreview2();
         System.out.print(SOFTGRAY+"Enter Product ID to edit: "+RESET);
         String editId = console.readLine();
         if (editId == null) editId = "";
@@ -1319,6 +1352,7 @@ private void handleProductManagement(BufferedReader console) throws Exception {
         }
 
     } else if (action.equals("D")) {
+         showProductsPreview2();
         // Delete a product
         System.out.print(SOFTGRAY+"Enter Product ID to delete: "+RESET);
         String delId = console.readLine();
@@ -1943,6 +1977,49 @@ private void showProductsPreview() {
     System.out.print(SOFTGRAY + "Tip: Choose B for Brand or C for Category, then type a keyword.\n" + RESET);
     printLine();
 }
+private void showProductsPreview2() {
+    System.out.println(PINK + BOLD + "\nProducts List (Preview)" + RESET);
+    printLine();
+
+    if (dp.productCount == 0) {
+        System.out.println(ROSE + "No products available." + RESET);
+        printLine();
+        return;
+    }
+
+    // Header
+    System.out.printf(
+        LAVENDER + "%-8s %-16s %-14s %-30s %-10s %-8s" + RESET + "%n",
+        "ProdID", "Category", "Brand", "Name", "Price", "Stock"
+    );
+    System.out.println(SOFTGRAY +
+        "--------------------------------------------------------------------------"
+        + RESET
+    );
+
+    // Rows
+    for (int i = 0; i < dp.productCount; i++) {
+        Product p = dp.products[i];
+        if (p == null) continue;
+
+        String stockColor = p.stock <= 5 ? ROSE : MINT;
+
+        System.out.printf(
+            "%-8s %-16s %-14s %-30s %-10d %s%-8d%s%n",
+            p.productId,
+            p.category,
+            p.brand,
+            p.name,
+            p.price,
+            stockColor,
+            p.stock,
+            RESET
+        );
+    }
+
+    printLine();
+}
+
 private void printProductSummary() {
     int totalProducts = dp.productCount;
     int inStock = 0;
@@ -2090,5 +2167,552 @@ private void showTimelinePreview() {
 
     printLine();
 }
+private void deleteAllOrderHistory(BufferedReader console) throws Exception {
+    Admin currentAdmin = dp.admins[dp.currentAdminIndex];
+
+    // ✅ Admin-only protection
+    if (currentAdmin == null || currentAdmin.role != Role.ADMIN) {
+        System.out.print(ROSE + "Access denied. Admin only.\n" + RESET);
+        return;
+    }
+
+    if (dp.orderCount == 0) {
+        System.out.print(SOFTGRAY + "No orders to delete.\n" + RESET);
+        return;
+    }
+
+    System.out.print(ROSE + "WARNING: This will delete ALL order history.\n" + RESET);
+    System.out.print(SOFTGRAY + "Type DELETE to confirm: " + RESET);
+    String conf1 = console.readLine();
+    if (conf1 == null) conf1 = "";
+    conf1 = conf1.trim();
+
+    if (!conf1.equalsIgnoreCase("DELETE")) {
+        System.out.print(ROSE + "Cancelled.\n" + RESET);
+        return;
+    }
+
+    System.out.print(SOFTGRAY + "Are you REALLY sure? Type YES: " + RESET);
+    String conf2 = console.readLine();
+    if (conf2 == null) conf2 = "";
+    conf2 = conf2.trim();
+
+    if (!conf2.equalsIgnoreCase("YES")) {
+        System.out.print(ROSE + "Cancelled.\n" + RESET);
+        return;
+    }
+
+    // ✅ Count before delete
+    int deletedCount = dp.orderCount;
+
+    String archiveFileName = "orders_archive.txt";
+    String archivePath = dp.path(archiveFileName);
+
+    // ===============================
+    // ✅ BACKUP ORDERS (SOFT DELETE)
+    // ===============================
+    FileWriter backup = null;
+    try {
+        backup = new FileWriter(archivePath, true);
+        backup.write("\n=== ARCHIVE DELETE by " + currentAdmin.username + " ===\n");
+        backup.write("Deleted at: " + dp.currentDateTimeString() + "\n");
+
+        for (int i = 0; i < dp.orderCount; i++) {
+            Order o = dp.orders[i];
+            if (o == null) continue;
+
+            StringBuilder itemList = new StringBuilder();
+            for (int j = 0; j < o.itemCount; j++) {
+                Item it = o.items[j];
+                if (it == null) continue;
+                itemList.append(it.productId).append("x").append(it.quantity);
+                if (j < o.itemCount - 1) itemList.append(",");
+            }
+
+            backup.write(
+                o.orderId + "|" + o.date + "|" + o.address + "|" +
+                o.paymentMode + "|" + o.status + "|" +
+                o.totalAmount + "|" + itemList.toString()
+            );
+
+            if (o.cancelReason != null && !o.cancelReason.equals("")) {
+                backup.write("|" + o.cancelReason);
+            }
+
+            if (o.trackingId != null && !o.trackingId.equals("")) {
+                backup.write("|" + o.trackingId);
+            }
+
+            backup.write("\n");
+        }
+    } finally {
+        if (backup != null) backup.close();
+    }
+
+    // ===============================
+    // ✅ CLEAR ORDERS FROM MEMORY
+    // ===============================
+    for (int i = 0; i < dp.orderCount; i++) {
+        dp.orders[i] = null;
+    }
+    dp.orderCount = 0;
+
+    // ✅ Clear orders.txt
+    dp.saveOrders();
+
+    // ===============================
+    // ✅ DELETE RECEIPT FILES
+    // ===============================
+    int[] receiptResult = deleteAllReceiptFiles();
+    int receiptDeleted = receiptResult[0];
+    int receiptFailed = receiptResult[1];
+
+    // ===============================
+    // ✅ ARCHIVE SIZE
+    // ===============================
+    long sizeBytes = 0;
+    try {
+        java.io.File f = new java.io.File(archivePath);
+        if (f.exists()) sizeBytes = f.length();
+    } catch (Exception e) {}
+
+    long sizeKB = (sizeBytes + 1023) / 1024;
+
+    // ===============================
+    // ✅ LOGGING & AUDIT
+    // ===============================
+    log.write(
+        "ADMIN",
+        "Deleted ALL order history. Orders=" + deletedCount +
+        ", Receipts=" + receiptDeleted +
+        ", Backup=" + archiveFileName
+    );
+    dp.appendLoginAudit("DELETE_ORDERS", currentAdmin.username);
+
+    String lastAuditLine = readLastLine(dp.path("login_audit.txt"));
+
+    // ===============================
+    // ✅ FINAL OUTPUT
+    // ===============================
+    System.out.print(MINT + "All order history deleted successfully.\n" + RESET);
+    System.out.print(SOFTGRAY + "Deleted Orders: " + RESET + MINT + deletedCount + RESET + "\n");
+    System.out.print(SOFTGRAY + "Receipts Deleted: " + RESET + LAVENDER + receiptDeleted + RESET + "\n");
+
+    if (receiptFailed > 0) {
+        System.out.print(ROSE + "Receipts Failed: " + receiptFailed + RESET + "\n");
+    }
+
+    System.out.print(SOFTGRAY + "Backup File: " + RESET + LAVENDER + archiveFileName + RESET + "\n");
+    System.out.print(SOFTGRAY + "Archive Size: " + RESET + LAVENDER + sizeKB + " KB" + RESET + "\n");
+
+    if (lastAuditLine != null && !lastAuditLine.equals("")) {
+        System.out.print(SOFTGRAY + "Last Audit: " + RESET + lastAuditLine + "\n");
+    }
+}
+
+private String readLastLine(String filePath) {
+    BufferedReader br = null;
+    try {
+        br = new BufferedReader(new FileReader(filePath));
+        String line;
+        String last = "";
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (!line.equals("")) last = line;
+        }
+        return last;
+    } catch (Exception e) {
+        return "";
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+    }
+}
+private int[] deleteAllReceiptFiles() {
+    int deleted = 0;
+    int failed = 0;
+
+    try {
+        // Find the folder where orders.txt exists (same folder will contain receipts usually)
+        java.io.File ordersFile = new java.io.File(dp.path("orders.txt"));
+        java.io.File dir = ordersFile.getParentFile();
+
+        // If no parent folder, use current directory
+        if (dir == null) dir = new java.io.File(".");
+
+        java.io.File[] files = dir.listFiles();
+        if (files == null) return new int[]{0, 0};
+
+        for (int i = 0; i < files.length; i++) {
+            java.io.File f = files[i];
+            if (f == null) continue;
+
+            String name = f.getName();
+            if (name == null) continue;
+
+            // receipts like: receipt_O1016.txt or receipt_01016.txt
+            if (name.startsWith("receipt_") && name.endsWith(".txt")) {
+                boolean ok = false;
+                try {
+                    ok = f.delete();
+                } catch (Exception ex) {
+                    ok = false;
+                }
+                if (ok) deleted++;
+                else failed++;
+            }
+        }
+    } catch (Exception e) {
+        // ignore (no crash)
+    }
+
+    return new int[]{deleted, failed};
+}
+private void restoreOrdersFromArchive(BufferedReader console) throws Exception {
+    Admin currentAdmin = dp.admins[dp.currentAdminIndex];
+    if (currentAdmin == null || currentAdmin.role != Role.ADMIN) {
+        System.out.print(ROSE + "Access denied. Admin only.\n" + RESET);
+        return;
+    }
+
+    String archivePath = dp.path("orders_archive.txt");
+    java.io.File archiveFile = new java.io.File(archivePath);
+
+    if (!archiveFile.exists()) {
+        System.out.print(ROSE + "Archive file not found: orders_archive.txt\n" + RESET);
+        return;
+    }
+
+    // ✅ Preview first
+    previewArchiveSessions();
+
+    System.out.print(SOFTGRAY +
+        "Restore Options:\n" + RESET +
+        "1) Restore latest delete only\n" +
+        "2) Restore by date (YYYY-MM-DD)\n" +
+        "3) Restore ALL archive orders\n" +
+        "Choose (1-3): "
+    );
+    String opt = console.readLine();
+    if (opt == null) opt = "";
+    opt = opt.trim();
+
+    if (!opt.equals("1") && !opt.equals("2") && !opt.equals("3")) {
+        System.out.print(ROSE + "Invalid option.\n" + RESET);
+        return;
+    }
+
+    String dateFilter = "";
+    if (opt.equals("2")) {
+        System.out.print(SOFTGRAY + "Enter date (YYYY-MM-DD): " + RESET);
+        dateFilter = console.readLine();
+        if (dateFilter == null) dateFilter = "";
+        dateFilter = dateFilter.trim();
+
+        if (dateFilter.length() != 10) {
+            System.out.print(ROSE + "Invalid date format.\n" + RESET);
+            return;
+        }
+    }
+
+    // ✅ Confirm restore
+    System.out.print(ROSE + "This will modify orders.txt.\n" + RESET);
+    System.out.print(SOFTGRAY + "Type RESTORE to confirm: " + RESET);
+    String conf = console.readLine();
+    if (conf == null) conf = "";
+    conf = conf.trim();
+    if (!conf.equalsIgnoreCase("RESTORE")) {
+        System.out.print(ROSE + "Restore cancelled.\n" + RESET);
+        return;
+    }
+
+    // ✅ Backup orders.txt so we can UNDO
+    backupOrdersBeforeRestore();
+
+    int restoredCount = 0;
+    if (opt.equals("1")) restoredCount = restoreLatestSessionOnly();
+    else if (opt.equals("2")) restoredCount = restoreByDate(dateFilter);
+    else restoredCount = restoreAllArchiveOrders();
+
+    // Reload into memory
+    dp.loadAll();
+
+    log.write("ADMIN", "RESTORE from archive. Count=" + restoredCount);
+    dp.appendLoginAudit("RESTORE_ORDERS", currentAdmin.username);
+
+    System.out.print(MINT + "Restore complete.\n" + RESET);
+    System.out.print(SOFTGRAY + "Orders Restored: " + RESET + MINT + restoredCount + RESET + "\n");
+    System.out.print(SOFTGRAY + "You can undo using option 26.\n" + RESET);
+}
+private void previewArchiveSessions() {
+    System.out.println(PINK + BOLD + "\nArchive Preview (Delete Sessions)" + RESET);
+    printLine();
+
+    BufferedReader br = null;
+    try {
+        br = new BufferedReader(new FileReader(dp.path("orders_archive.txt")));
+        String line;
+
+        String currentUser = "";
+        String currentDateTime = "";
+        int currentCount = 0;
+
+        int sessionNo = 0;
+
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            if (line.equals("")) continue;
+
+            // session header
+            if (line.startsWith("=== ARCHIVE DELETE by")) {
+                // print previous session
+                if (sessionNo > 0) {
+                    System.out.println(LAVENDER + "Session " + sessionNo + RESET +
+                            SOFTGRAY + " | By: " + RESET + currentUser +
+                            SOFTGRAY + " | At: " + RESET + currentDateTime +
+                            SOFTGRAY + " | Orders: " + RESET + currentCount);
+                    currentCount = 0;
+                }
+                sessionNo++;
+                currentUser = line.replace("=== ARCHIVE DELETE by", "").replace("===", "").trim();
+                currentDateTime = "";
+                continue;
+            }
+
+            if (line.startsWith("Deleted at:")) {
+                currentDateTime = line.replace("Deleted at:", "").trim();
+                continue;
+            }
+
+            // order lines
+            if (line.contains("|")) {
+                currentCount++;
+            }
+        }
+
+        // last session
+        if (sessionNo > 0) {
+            System.out.println(LAVENDER + "Session " + sessionNo + RESET +
+                    SOFTGRAY + " | By: " + RESET + currentUser +
+                    SOFTGRAY + " | At: " + RESET + currentDateTime +
+                    SOFTGRAY + " | Orders: " + RESET + currentCount);
+        } else {
+            System.out.println(ROSE + "No archive sessions found." + RESET);
+        }
+
+    } catch (Exception e) {
+        System.out.println(ROSE + "Failed to preview archive." + RESET);
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+    }
+
+    printLine();
+}
+private void backupOrdersBeforeRestore() {
+    BufferedReader br = null;
+    FileWriter fw = null;
+
+    try {
+        br = new BufferedReader(new FileReader(dp.path("orders.txt")));
+        fw = new FileWriter(dp.path("orders_restore_backup.txt"), false);
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            fw.write(line + "\n");
+        }
+    } catch (Exception e) {
+        // if orders.txt doesn't exist yet, still create empty backup
+        try {
+            fw = new FileWriter(dp.path("orders_restore_backup.txt"), false);
+        } catch (Exception ex) {}
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+        try { if (fw != null) fw.close(); } catch (Exception ex) {}
+    }
+}
+private int restoreLatestSessionOnly() {
+    BufferedReader br = null;
+    FileWriter fw = null;
+
+    int restored = 0;
+
+    try {
+        br = new BufferedReader(new FileReader(dp.path("orders_archive.txt")));
+
+        // First pass: find the last session start
+        String line;
+        int lastSessionLine = -1;
+        int lineNo = 0;
+
+        while ((line = br.readLine()) != null) {
+            lineNo++;
+            if (line.trim().startsWith("=== ARCHIVE DELETE by")) {
+                lastSessionLine = lineNo;
+            }
+        }
+        br.close();
+
+        if (lastSessionLine == -1) return 0;
+
+        // Second pass: read from last session and write only order lines
+        br = new BufferedReader(new FileReader(dp.path("orders_archive.txt")));
+        fw = new FileWriter(dp.path("orders.txt"), true); // append
+
+        lineNo = 0;
+        boolean inLatest = false;
+
+        while ((line = br.readLine()) != null) {
+            lineNo++;
+            String t = line.trim();
+
+            if (lineNo == lastSessionLine) inLatest = true;
+
+            if (!inLatest) continue;
+
+            if (t.equals("") || t.startsWith("===") || t.startsWith("Deleted at:")) continue;
+
+            if (t.contains("|")) {
+                fw.write(t + "\n");
+                restored++;
+            }
+        }
+
+    } catch (Exception e) {
+        return restored;
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+        try { if (fw != null) fw.close(); } catch (Exception ex) {}
+    }
+
+    return restored;
+}
+private int restoreByDate(String dateFilter) {
+    BufferedReader br = null;
+    FileWriter fw = null;
+
+    int restored = 0;
+
+    try {
+        br = new BufferedReader(new FileReader(dp.path("orders_archive.txt")));
+        fw = new FileWriter(dp.path("orders.txt"), true);
+
+        String line;
+        boolean sessionMatch = false;
+
+        while ((line = br.readLine()) != null) {
+            String t = line.trim();
+            if (t.equals("")) continue;
+
+            if (t.startsWith("=== ARCHIVE DELETE by")) {
+                sessionMatch = false; // reset for new session
+                continue;
+            }
+
+            if (t.startsWith("Deleted at:")) {
+                String dt = t.replace("Deleted at:", "").trim();
+                // match only date part
+                if (dt.startsWith(dateFilter)) sessionMatch = true;
+                continue;
+            }
+
+            if (!sessionMatch) continue;
+
+            if (t.startsWith("===") || t.startsWith("Deleted at:")) continue;
+
+            if (t.contains("|")) {
+                fw.write(t + "\n");
+                restored++;
+            }
+        }
+
+    } catch (Exception e) {
+        return restored;
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+        try { if (fw != null) fw.close(); } catch (Exception ex) {}
+    }
+
+    return restored;
+}
+private int restoreAllArchiveOrders() {
+    BufferedReader br = null;
+    FileWriter fw = null;
+
+    int restored = 0;
+
+    try {
+        br = new BufferedReader(new FileReader(dp.path("orders_archive.txt")));
+        fw = new FileWriter(dp.path("orders.txt"), true);
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            String t = line.trim();
+            if (t.equals("")) continue;
+
+            if (t.startsWith("===") || t.startsWith("Deleted at:")) continue;
+
+            if (t.contains("|")) {
+                fw.write(t + "\n");
+                restored++;
+            }
+        }
+
+    } catch (Exception e) {
+        return restored;
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+        try { if (fw != null) fw.close(); } catch (Exception ex) {}
+    }
+
+    return restored;
+}
+private void undoLastRestore(BufferedReader console) throws Exception {
+    Admin currentAdmin = dp.admins[dp.currentAdminIndex];
+    if (currentAdmin == null || currentAdmin.role != Role.ADMIN) {
+        System.out.print(ROSE + "Access denied. Admin only.\n" + RESET);
+        return;
+    }
+
+    java.io.File backupFile = new java.io.File(dp.path("orders_restore_backup.txt"));
+    if (!backupFile.exists()) {
+        System.out.print(ROSE + "No restore backup found. Cannot undo.\n" + RESET);
+        return;
+    }
+
+    System.out.print(ROSE + "Undo will revert orders.txt to previous state.\n" + RESET);
+    System.out.print(SOFTGRAY + "Type UNDO to confirm: " + RESET);
+    String conf = console.readLine();
+    if (conf == null) conf = "";
+    conf = conf.trim();
+
+    if (!conf.equalsIgnoreCase("UNDO")) {
+        System.out.print(ROSE + "Undo cancelled.\n" + RESET);
+        return;
+    }
+
+    BufferedReader br = null;
+    FileWriter fw = null;
+
+    try {
+        br = new BufferedReader(new FileReader(dp.path("orders_restore_backup.txt")));
+        fw = new FileWriter(dp.path("orders.txt"), false); // overwrite
+
+        String line;
+        while ((line = br.readLine()) != null) {
+            fw.write(line + "\n");
+        }
+    } finally {
+        try { if (br != null) br.close(); } catch (Exception ex) {}
+        try { if (fw != null) fw.close(); } catch (Exception ex) {}
+    }
+
+    dp.loadAll();
+
+    log.write("ADMIN", "UNDO restore (orders.txt reverted).");
+    dp.appendLoginAudit("UNDO_RESTORE", currentAdmin.username);
+
+    System.out.print(MINT + "Undo successful. orders.txt restored to previous state.\n" + RESET);
+}
+
+
    }
 
