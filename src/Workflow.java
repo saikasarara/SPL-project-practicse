@@ -217,8 +217,8 @@ private int countLowStock(int threshold) {
             System.out.print(LAVENDER + "21." + RESET + " " + ROSE + "Add New Admin (Admin only)" + RESET + "\n");
             System.out.print(LAVENDER + "22." + RESET + " " + ROSE + "Change Admin Password (Admin only)" + RESET + "\n");
             System.out.print(LAVENDER + "23." + RESET + " " + ROSE + "Generate Report (Admin only)" + RESET + "\n");
-            System.out.print(LAVENDER+"24."+RESET +" "+ ROSE + "Delete ALL Order History" + RESET + "\n");
-            System.out.print(LAVENDER+"25."+RESET + " "+ROSE + "Restore Order History (Archive)" + RESET + "\n");
+            System.out.print(LAVENDER+"24."+RESET +" "+ ROSE + "Delete ALL Order History(Admin only)" + RESET + "\n");
+            System.out.print(LAVENDER+"25."+RESET + " "+ROSE + "Restore Order History(Admin Only)" + RESET + "\n");
             System.out.print(LAVENDER+"26."+RESET + " "+ROSE + "Undo Last Restore" + RESET + "\n");
 
 
