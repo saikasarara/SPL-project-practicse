@@ -1,4 +1,3 @@
-/** Product.java – Product model (represents an item in inventory) */
 public class Product {
     public String productId;
     public String category;

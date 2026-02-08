@@ -1,4 +1,3 @@
-/** Item.java – Item model (represents a product and quantity in an order) */
 public class Item {
     public String productId;
     public int quantity;

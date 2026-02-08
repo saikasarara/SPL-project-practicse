@@ -1,6 +1,3 @@
-
-
-/** Order.java – Order model storing order details and providing a record format for persistence */
 public class Order {
     public String orderId;
     public String date;           // e.g., "2026-02-01"
