@@ -1257,7 +1257,7 @@ private void printProductTable(Product[] list, int count, String title) {
             + RESET + "\n");
 
     System.out.println(SOFTGRAY
-            + "--------------------------------------------------------------------------"
+            + "----------------------------------------------------------------------------------------"
             + RESET);
 
     // Rows
