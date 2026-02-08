@@ -10,3 +10,10 @@ Order 02006 - PAYMENT OK (MockCard approved)
 Order 02006 - Status changed to PACKED
 Order 02006 - Status changed to SHIPPED
 Order ADMIN - Edited product M101 (Price changed)
+Order ADMIN - Edited product P106 (Price changed)
+Order ADMIN - Restocked M102 (+10)
+Order ADMIN - Restocked M103 (+20)
+Order ADMIN - Restocked L202 (+10)
+Order ADMIN - Restocked H301 (+20)
+Order ADMIN - Restocked A401 (+30)
+Order ADMIN - Restocked A404 (+20)

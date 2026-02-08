@@ -753,7 +753,7 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
 
     /** Feature 6 (continued): View or filter products by brand or category */
     private void handleAdvancedFilter(BufferedReader console) throws Exception {
-        showProductsPreview();
+        showProductsPreview2();
         System.out.print(SOFTGRAY+"Filter by Brand or Category? (B/C): "+RESET);
         String choice = console.readLine();
         if (choice == null) choice = "";
@@ -783,14 +783,15 @@ private void handleOrderSearch(BufferedReader console) throws Exception {
         }
         if (count == 0) {
             System.out.print(ROSE+"No products found for \"" + keyword + "\".\n"+RESET);
-        } else {
-            // Simply list the filtered products (ProductID | Name | Price | Stock)
-            System.out.print(SOFTGRAY+"Filtered products (" + (choice.equals("B") ? "Brand" : "Category") + " contains \"" + keyword + "\"):\n"+RESET);
-            for (int i = 0; i < count; i++) {
-                Product p = filtered[i];
-                System.out.print(SOFTGRAY+"- " + p.productId + " | " + p.name + " | BDT " + p.price + " | Stock: " + p.stock + "\n"+RESET);
-            }
-        }
+        }  else {
+    String title =
+        "Filtered Products (" +
+        (choice.equals("B") ? "Brand" : "Category") +
+        " contains \"" + keyword + "\")";
+
+    printProductTable(filtered, count, title);
+}
+    
     }
 
     /** Feature 13: Display low stock items (stock < 5) highlighted in color */
@@ -1222,7 +1223,63 @@ private void generateReceipt(BufferedReader console) throws Exception {
         dp.saveProducts();
         log.write("ADMIN", "Restocked " + product.productId + " (+" + addQty + ")");
     }
+    private String padRight(String s, int width) {
+    if (s == null) s = "";
+    if (s.length() >= width) return s.substring(0, width - 1) + "…";
+    String out = s;
+    while (out.length() < width) out += " ";
+    return out;
+}
 
+private String formatMoney(int n) {
+    // simple (no commas). If you want commas, tell me.
+    return "BDT " + n;
+}
+
+private void printProductTable(Product[] list, int count, String title) {
+    System.out.println(PINK + BOLD + "\n" + title + RESET);
+    printLine();
+
+    if (count == 0) {
+        System.out.println(ROSE + "No products found." + RESET);
+        printLine();
+        return;
+    }
+
+    // Header
+    System.out.print(LAVENDER
+            + padRight("ID", 8)
+            + padRight("Name", 26)
+            + padRight("Brand", 14)
+            + padRight("Category", 16)
+            + padRight("Price", 12)
+            + padRight("Stock", 8)
+            + RESET + "\n");
+
+    System.out.println(SOFTGRAY
+            + "--------------------------------------------------------------------------"
+            + RESET);
+
+    // Rows
+    for (int i = 0; i < count; i++) {
+        Product p = list[i];
+        if (p == null) continue;
+
+        String stockColor = (p.stock <= 5) ? ROSE : MINT;
+
+        System.out.print(
+                SOFTGRAY + padRight(p.productId, 8) + RESET +
+                padRight(p.name, 26) +
+                padRight(p.brand, 14) +
+                padRight(p.category, 16) +
+                padRight(formatMoney(p.price), 12) +
+                stockColor + padRight(String.valueOf(p.stock), 8) + RESET +
+                "\n"
+        );
+    }
+
+    printLine();
+}
   /** Feature 23: Manage products (Add, Edit, Delete products) */
 private void handleProductManagement(BufferedReader console) throws Exception {
     System.out.print(SOFTGRAY+"Choose action - [A]dd, [E]dit, [D]elete: "+RESET);
@@ -1936,45 +1993,6 @@ private void showOrdersPreview() {
         );
     }
 
-    printLine();
-}
-
-
-private void showProductsPreview() {
-    System.out.print(PINK + BOLD + "\nProduct List (Preview)\n" + RESET);
-    printLine();
-
-    if (dp.productCount == 0) {
-        System.out.print(ROSE + "No products available.\n" + RESET);
-        printLine();
-        return;
-    }
-
-    // Header
-    System.out.printf(LAVENDER + "%-10s %-20s %-12s %-14s %-8s\n" + RESET,
-            "ProdID", "Name", "Brand", "Category", "Stock");
-    System.out.print(SOFTGRAY + "---------------------------------------------------------------\n" + RESET);
-
-    for (int i = 0; i < dp.productCount; i++) {
-        Product p = dp.products[i];
-        if (p == null) continue;
-
-        // Stock color highlight
-        String stockColor = SOFTGRAY;
-        if (p.stock <= 5) stockColor = ANSI_Yellow;  // low stock
-        else stockColor = MINT;
-
-        System.out.printf("%-10s %-20s %-12s %-14s %s%-8d%s\n",
-                p.productId,
-                p.name,
-                (p.brand == null ? "" : p.brand),
-                (p.category == null ? "" : p.category),
-                stockColor, p.stock, RESET
-        );
-    }
-
-    printLine();
-    System.out.print(SOFTGRAY + "Tip: Choose B for Brand or C for Category, then type a keyword.\n" + RESET);
     printLine();
 }
 private void showProductsPreview2() {
@@ -2712,7 +2730,5 @@ private void undoLastRestore(BufferedReader console) throws Exception {
 
     System.out.print(MINT + "Undo successful. orders.txt restored to previous state.\n" + RESET);
 }
-
-
    }
 
